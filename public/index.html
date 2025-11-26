@@ -136,8 +136,8 @@
         /* Circular Progress Ring */
         .ring-wrapper {
             position: relative;
-            width: 220px;
-            height: 220px;
+            width: 260px;
+            height: 260px;
             margin-bottom: 20px;
             display: flex;
             justify-content: center;
@@ -181,7 +181,7 @@
         }
 
         .rsi-number {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 800;
             line-height: 1;
             color: var(--text-color);
@@ -284,6 +284,11 @@
             display: flex;
             flex-direction: column;
             gap: 25px;
+            height: 100%;
+        }
+
+        .side-column .card:last-child {
+            flex: 1;
         }
 
         .subscribe-card {
@@ -456,7 +461,7 @@
                     <div class="card-title">
                         <span>🔔</span> 邮件提醒订阅
                     </div>
-                    <form id="subscribe-form" action="__FORMSPREE_ENDPOINT__" method="POST" class="subscribe-form">
+                    <form id="subscribe-form" action="https://formspree.io/f/xzzqlybo" method="POST" class="subscribe-form">
                         <input type="email" name="email" class="subscribe-input" placeholder="输入您的邮箱地址" required>
                         <button type="submit" class="subscribe-btn">立即订阅</button>
                     </form>
@@ -614,12 +619,17 @@
                     els.formStatus.className = "form-status error";
                 }
             } catch (err) {
-                els.formStatus.textContent = "❌ 网络错误";
+                console.error('Submission error:', err);
+                els.formStatus.textContent = "❌ 网络错误 (详情见控制台)";
                 els.formStatus.className = "form-status error";
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
-                setTimeout(() => els.formStatus.textContent = "", 5000);
+                setTimeout(() => {
+                    if (els.formStatus.className.includes('success')) {
+                        els.formStatus.textContent = "";
+                    }
+                }, 5000);
             }
         });
 
