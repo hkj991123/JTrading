@@ -2,8 +2,8 @@ name: Daily RSI Check
 
 on:
   schedule:
-    # 北京时间 10:00 (UTC 02:00) 和 14:00 (UTC 06:00) 运行
-    - cron: '0 2,6 * * *'
+    # 北京时间 09:00 - 15:00 每小时运行一次 (UTC 01:00 - 07:00)
+    - cron: '0 1-7 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
