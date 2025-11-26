@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>红利低波ETF (512890) RSI 监控 - GitHub Pages</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,6 +16,25 @@
             --card-bg: #ffffff;
             --text-color: #2c3e50;
             --text-secondary: #7f8c8d;
+            --shadow-color: rgba(0,0,0,0.05);
+            --info-bg: rgba(255,255,255,0.6);
+            --border-color: rgba(0,0,0,0.05);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #5dade2;
+                --success-color: #4cd137;
+                --warning-color: #ff6b6b;
+                --neutral-color: #f5f6fa;
+                --bg-color: #1e272e;
+                --card-bg: #2f3640;
+                --text-color: #f5f6fa;
+                --text-secondary: #dcdde1;
+                --shadow-color: rgba(0,0,0,0.3);
+                --info-bg: rgba(0,0,0,0.2);
+                --border-color: rgba(255,255,255,0.1);
+            }
         }
 
         body {
@@ -26,6 +46,7 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -53,10 +74,10 @@
         .card {
             background: var(--card-bg);
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px var(--shadow-color);
             padding: 30px;
             margin-bottom: 20px;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .rsi-display {
@@ -196,12 +217,13 @@
         
         .info-section {
             margin-top: 20px;
-            background: rgba(255,255,255,0.6);
+            background: var(--info-bg);
             border-radius: 12px;
             padding: 15px 20px;
             font-size: 0.9rem;
             color: var(--text-secondary);
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
         details summary {
@@ -342,7 +364,32 @@
             meterIndicator.style.left = `${clampedRsi}%`;
 
             // Update Time
-            updateTimeEl.textContent = "上次更新: " + (data.timestamp || "未知");
+            let timeStr = data.timestamp || "未知";
+            // 尝试计算相对时间
+            try {
+                // 移除 "(GitHub Actions)" 后缀并解析
+                const cleanTime = timeStr.replace(" (GitHub Actions)", "").replace(/-/g, "/");
+                const updateDate = new Date(cleanTime);
+                const now = new Date();
+                const diffMs = now - updateDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                
+                if (!isNaN(diffMins)) {
+                    let relativeTime = "";
+                    if (diffMins < 1) relativeTime = "刚刚";
+                    else if (diffMins < 60) relativeTime = `${diffMins} 分钟前`;
+                    else {
+                        const diffHours = Math.floor(diffMins / 60);
+                        if (diffHours < 24) relativeTime = `${diffHours} 小时前`;
+                        else relativeTime = `${Math.floor(diffHours / 24)} 天前`;
+                    }
+                    timeStr += ` (${relativeTime})`;
+                }
+            } catch (e) {
+                console.log("时间解析失败", e);
+            }
+            
+            updateTimeEl.textContent = "上次更新: " + timeStr;
         }
 
         async function fetchData() {
