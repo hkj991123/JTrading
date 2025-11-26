@@ -101,7 +101,30 @@ def send_email(to_email, subject, content):
         print("未配置发件人邮箱或密码，跳过发送邮件。")
         return
 
-    message = MIMEText(content, 'plain', 'utf-8')
+    # 构建 HTML 邮件内容
+    html_content = f"""
+    <html>
+    <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <h2 style="color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px;">{subject}</h2>
+            
+            <div style="font-size: 16px; line-height: 1.6; color: #34495e; margin: 20px 0;">
+                {content.replace(chr(10), '<br>')}
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1; font-size: 12px; color: #95a5a6; text-align: center;">
+                <p>此邮件由 GitHub Actions 自动发送，请勿直接回复。</p>
+                <p>
+                    如果您不想继续接收此类邮件，可以 
+                    <a href="mailto:{SENDER_EMAIL}?subject=取消订阅 RSI 监控&body=请将我的邮箱从订阅列表中移除" style="color: #e74c3c; text-decoration: none; font-weight: bold;">点击此处取消订阅</a>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    message = MIMEText(html_content, 'html', 'utf-8')
     message['From'] = Header("RSI 监控助手", 'utf-8')
     message['To'] = Header(to_email, 'utf-8')
     message['Subject'] = Header(subject, 'utf-8')
