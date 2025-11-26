@@ -129,113 +129,154 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 300px;
+            padding-top: 40px;
+            padding-bottom: 30px;
         }
 
-        .gauge-container {
+        /* Circular Progress Ring */
+        .ring-wrapper {
             position: relative;
-            width: 260px;
-            height: 130px; /* Half circle */
+            width: 220px;
+            height: 220px;
             margin-bottom: 20px;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .gauge-bg {
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            background: conic-gradient(
-                from 270deg,
-                var(--success-color) 0deg 72deg,   /* 0-40: Buy */
-                var(--neutral-color) 72deg 126deg, /* 40-70: Neutral */
-                var(--warning-color) 126deg 180deg, /* 70-100: Sell */
-                transparent 180deg
-            );
-            mask: radial-gradient(transparent 65%, black 66%);
-            -webkit-mask: radial-gradient(transparent 65%, black 66%);
+        .ring-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
         }
 
-        .gauge-needle {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 4px;
-            height: 120px;
-            background: var(--text-color);
-            transform-origin: bottom center;
-            transform: rotate(-90deg); /* Default start */
-            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            border-radius: 4px;
-            z-index: 2;
-        }
-        
-        .gauge-center-dot {
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background: var(--text-color);
-            border-radius: 50%;
-            z-index: 3;
+        .ring-bg {
+            fill: none;
+            stroke: var(--bg-color); /* Use page bg color for track */
+            stroke-width: 12;
         }
 
-        .rsi-value-display {
+        /* Dark mode adjustment for ring track */
+        @media (prefers-color-scheme: dark) {
+            .ring-bg {
+                stroke: rgba(255,255,255,0.05);
+            }
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+            filter: drop-shadow(0 0 4px rgba(0,0,0,0.1));
+        }
+
+        .ring-content {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
         }
 
         .rsi-number {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 800;
             line-height: 1;
             color: var(--text-color);
+            letter-spacing: -2px;
+        }
+
+        .rsi-label-inner {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .rsi-status-text {
             font-size: 1.2rem;
-            font-weight: 600;
-            margin-top: 10px;
-            padding: 6px 16px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-
-        .status-buy { color: var(--success-color); background: rgba(46, 204, 113, 0.1); }
-        .status-sell { color: var(--warning-color); background: rgba(231, 76, 60, 0.1); }
-        .status-neutral { color: var(--neutral-color); background: rgba(149, 165, 166, 0.1); }
-
-        .price-row {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
-            width: 100%;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 1.4rem;
             font-weight: 700;
+            margin-top: 5px;
+            padding: 8px 24px;
+            border-radius: 50px;
+            display: inline-block;
+            /* Neumorphic style flat shadow */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid transparent;
+        }
+
+        .status-buy { 
+            color: var(--success-color); 
+            background: rgba(46, 204, 113, 0.08); 
+            border-color: rgba(46, 204, 113, 0.2);
+        }
+        .status-sell { 
+            color: var(--warning-color); 
+            background: rgba(231, 76, 60, 0.08); 
+            border-color: rgba(231, 76, 60, 0.2);
+        }
+        .status-neutral { 
+            color: var(--neutral-color); 
+            background: rgba(149, 165, 166, 0.08); 
+            border-color: rgba(149, 165, 166, 0.2);
+        }
+
+        .market-info {
+            margin-top: 25px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 25px;
+        }
+
+        .price-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .price-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .price-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .kline-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 30px;
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .kline-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
 
         /* Side Column */
@@ -380,31 +421,31 @@
                     <div>加载数据中...</div>
                 </div>
 
-                <div class="gauge-container">
-                    <div class="gauge-bg"></div>
-                    <div class="gauge-needle" id="gauge-needle"></div>
-                    <div class="gauge-center-dot"></div>
+                <div class="ring-wrapper">
+                    <svg class="ring-svg" viewBox="0 0 200 200">
+                        <!-- Background Track -->
+                        <circle class="ring-bg" cx="100" cy="100" r="85"></circle>
+                        <!-- Progress Ring -->
+                        <circle class="ring-progress" id="rsi-ring" cx="100" cy="100" r="85"></circle>
+                    </svg>
+                    
+                    <div class="ring-content">
+                        <div class="rsi-number" id="rsi-value">--</div>
+                        <div class="rsi-label-inner">RSI (14)</div>
+                    </div>
                 </div>
 
-                <div class="rsi-value-display">
-                    <div class="rsi-number" id="rsi-value">--</div>
-                </div>
-                
                 <div class="rsi-status-text" id="rsi-status">等待数据...</div>
 
-                <div class="price-row">
-                    <div class="stat-item">
-                        <div class="stat-label">当前价格</div>
-                        <div class="stat-value" id="price-value">--</div>
+                <div class="market-info">
+                    <div class="price-display">
+                        <div class="price-label">当前价格</div>
+                        <div class="price-value" id="price-value">--</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">操作建议</div>
-                        <div class="stat-value" style="font-size: 1rem; display: flex; align-items: center; height: 100%;">
-                            <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">
-                                查看K线图 &rarr;
-                            </a>
-                        </div>
-                    </div>
+                    
+                    <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank" class="kline-btn">
+                        📈 查看实时 K 线图
+                    </a>
                 </div>
             </div>
 
@@ -451,7 +492,7 @@
         <div class="footer">
             数据来源: Investing.com | Powered by GitHub Actions & Pages
             <br>
-            <a href="mailto:pear56@126.com">联系作者</a>
+            联系作者: <a href="mailto:pear56@126.com">pear56@126.com</a>
         </div>
     </div>
 
@@ -462,7 +503,7 @@
             rsiStatus: document.getElementById('rsi-status'),
             priceValue: document.getElementById('price-value'),
             updateBadge: document.getElementById('update-time-badge'),
-            needle: document.getElementById('gauge-needle'),
+            ring: document.getElementById('rsi-ring'),
             loading: document.getElementById('loading-overlay'),
             form: document.getElementById('subscribe-form'),
             formStatus: document.getElementById('form-status')
@@ -483,23 +524,35 @@
             // Update Price
             els.priceValue.textContent = data.price ? "¥" + data.price.toFixed(3) : "--";
 
-            // Update Status & Needle
-            // Needle rotation: 0-100 maps to 0-180 degrees (relative to start point)
-            // Start point is -90deg (left). 
-            // RSI 0 = -90deg. RSI 100 = 90deg.
-            // Formula: -90 + (rsi * 1.8)
-            const rotation = -90 + (Math.max(0, Math.min(100, rsi)) * 1.8);
-            els.needle.style.transform = `rotate(${rotation}deg)`;
+            // Update Ring Progress
+            // r = 85, circumference = 2 * PI * 85 ≈ 534
+            const radius = 85;
+            const circumference = 2 * Math.PI * radius;
+            
+            // Set dasharray only once if not set
+            if (!els.ring.style.strokeDasharray) {
+                els.ring.style.strokeDasharray = `${circumference} ${circumference}`;
+            }
 
+            // Calculate offset
+            // offset = circumference - (percent / 100) * circumference
+            const percent = Math.max(0, Math.min(100, rsi));
+            const offset = circumference - (percent / 100) * circumference;
+            els.ring.style.strokeDashoffset = offset;
+
+            // Update Colors & Status
             if (rsi < 40) {
                 els.rsiStatus.textContent = "建议买入 (超卖)";
                 els.rsiStatus.className = "rsi-status-text status-buy";
+                els.ring.style.stroke = "var(--success-color)";
             } else if (rsi > 70) {
                 els.rsiStatus.textContent = "建议卖出 (超买)";
                 els.rsiStatus.className = "rsi-status-text status-sell";
+                els.ring.style.stroke = "var(--warning-color)";
             } else {
                 els.rsiStatus.textContent = "观望 (中性)";
                 els.rsiStatus.className = "rsi-status-text status-neutral";
+                els.ring.style.stroke = "var(--neutral-color)";
             }
 
             // Update Time
