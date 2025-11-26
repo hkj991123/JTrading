@@ -242,37 +242,71 @@
             gap: 10px;
             margin-top: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .subscribe-input {
-            padding: 8px 12px;
+            padding: 10px 15px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-family: inherit;
-            width: 200px;
+            width: 220px;
             background: var(--card-bg);
             color: var(--text-color);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .subscribe-input:focus {
+            border-color: var(--primary-color);
         }
 
         .subscribe-btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
         }
 
         .subscribe-btn:hover {
             background-color: #2980b9;
+        }
+        
+        .subscribe-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .subscribe-btn:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
         }
 
         .subscribe-hint a {
             color: var(--primary-color);
             font-weight: 600;
             text-decoration: none;
+        }
+        
+        .form-status {
+            margin-top: 10px;
+            height: 20px; /* 占位防止抖动 */
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .form-status.success {
+            color: var(--success-color);
+            opacity: 1;
+        }
+        
+        .form-status.error {
+            color: var(--warning-color);
+            opacity: 1;
         }
         
         details summary {
@@ -358,10 +392,11 @@
 
         <div class="subscribe-hint">
             <div style="margin-bottom: 10px;">🔔 订阅买卖点邮件提醒</div>
-            <form action="https://formspree.io/f/xzzqlybo" method="POST" class="subscribe-form" target="_blank">
+            <form id="subscribe-form" action="https://formspree.io/f/xzzqlybo" method="POST" class="subscribe-form">
                 <input type="email" name="email" class="subscribe-input" placeholder="您的邮箱地址" required>
                 <button type="submit" class="subscribe-btn">订阅</button>
             </form>
+            <div id="form-status" class="form-status"></div>
             <div style="font-size: 0.75rem; margin-top: 8px; opacity: 0.8;">
                 提交后请留意作者审核，或直接联系 <a href="mailto:pear56@126.com">pear56@126.com</a>
             </div>
@@ -482,6 +517,57 @@
 
         // Initial load
         fetchData();
+
+        // Handle Form Submission via AJAX
+        const form = document.getElementById("subscribe-form");
+        const status = document.getElementById("form-status");
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const data = new FormData(event.target);
+            const btn = form.querySelector('button');
+            const originalBtnText = btn.textContent;
+            
+            btn.disabled = true;
+            btn.textContent = "提交中...";
+            
+            try {
+                const response = await fetch(event.target.action, {
+                    method: form.method,
+                    body: data,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    status.textContent = "✅ 订阅成功！请等待审核。";
+                    status.className = "form-status success";
+                    form.reset();
+                } else {
+                    const errorData = await response.json();
+                    if (Object.hasOwn(errorData, 'errors')) {
+                        status.textContent = "❌ " + errorData["errors"].map(error => error["message"]).join(", ");
+                    } else {
+                        status.textContent = "❌ 提交失败，请稍后重试。";
+                    }
+                    status.className = "form-status error";
+                }
+            } catch (error) {
+                status.textContent = "❌ 网络错误，请检查连接。";
+                status.className = "form-status error";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalBtnText;
+                
+                // 3秒后清除提示
+                setTimeout(() => {
+                    status.className = "form-status";
+                }, 5000);
+            }
+        }
+        
+        form.addEventListener("submit", handleSubmit);
     </script>
 </body>
 </html>
