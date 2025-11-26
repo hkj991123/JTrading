@@ -11,14 +11,13 @@
             --primary-color: #3498db;
             --success-color: #2ecc71;
             --warning-color: #e74c3c;
-            --neutral-color: #34495e;
-            --bg-color: #f0f2f5;
+            --neutral-color: #95a5a6;
+            --bg-color: #f4f6f9;
             --card-bg: #ffffff;
             --text-color: #2c3e50;
             --text-secondary: #7f8c8d;
-            --shadow-color: rgba(0,0,0,0.05);
-            --info-bg: rgba(255,255,255,0.6);
-            --border-color: rgba(0,0,0,0.05);
+            --shadow-color: rgba(0,0,0,0.08);
+            --border-color: #ecf0f1;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -26,14 +25,13 @@
                 --primary-color: #5dade2;
                 --success-color: #4cd137;
                 --warning-color: #ff6b6b;
-                --neutral-color: #f5f6fa;
-                --bg-color: #1e272e;
-                --card-bg: #2f3640;
-                --text-color: #f5f6fa;
-                --text-secondary: #dcdde1;
+                --neutral-color: #7f8c8d;
+                --bg-color: #1a1d21;
+                --card-bg: #2c3035;
+                --text-color: #ecf0f1;
+                --text-secondary: #bdc3c7;
                 --shadow-color: rgba(0,0,0,0.3);
-                --info-bg: rgba(0,0,0,0.2);
-                --border-color: rgba(255,255,255,0.1);
+                --border-color: #34495e;
             }
         }
 
@@ -43,563 +41,536 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
             min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
             width: 100%;
-            max-width: 1000px;
-            padding: 0 15px;
+            max-width: 1100px;
         }
 
+        /* Header */
         header {
-            text-align: center;
-            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        /* 布局容器 */
-        .dashboard-layout {
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-title .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .status-badge {
+            background: var(--card-bg);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+            70% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 25px;
         }
 
         @media (min-width: 850px) {
-            .dashboard-layout {
-                grid-template-columns: 1.4fr 1fr;
-                align-items: start;
+            .dashboard-grid {
+                grid-template-columns: 2fr 1fr;
             }
         }
 
-        /* 通用卡片样式 */
-        .dashboard-card {
+        /* Cards */
+        .card {
             background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--shadow-color);
+            border-radius: 24px;
             padding: 30px;
-            transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            box-sizing: border-box;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
         }
 
-        .side-card {
-            padding: 25px;
-            margin-bottom: 25px;
+        /* Main RSI Card */
+        .rsi-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 300px;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 260px;
+            height: 130px; /* Half circle */
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .gauge-bg {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 270deg,
+                var(--success-color) 0deg 72deg,   /* 0-40: Buy */
+                var(--neutral-color) 72deg 126deg, /* 40-70: Neutral */
+                var(--warning-color) 126deg 180deg, /* 70-100: Sell */
+                transparent 180deg
+            );
+            mask: radial-gradient(transparent 65%, black 66%);
+            -webkit-mask: radial-gradient(transparent 65%, black 66%);
+        }
+
+        .gauge-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 120px;
+            background: var(--text-color);
+            transform-origin: bottom center;
+            transform: rotate(-90deg); /* Default start */
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-radius: 4px;
+            z-index: 2;
         }
         
-        .side-card:last-child {
-            margin-bottom: 0;
+        .gauge-center-dot {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--text-color);
+            border-radius: 50%;
+            z-index: 3;
         }
 
-        .rsi-display {
+        .rsi-value-display {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            margin-bottom: 30px;
         }
 
-        .rsi-label {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .rsi-value {
-            font-size: 5rem;
-            font-weight: 700;
+        .rsi-number {
+            font-size: 3.5rem;
+            font-weight: 800;
             line-height: 1;
-            margin: 10px 0;
+            color: var(--text-color);
         }
 
-        .rsi-status {
+        .rsi-status-text {
             font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 15px;
-            padding: 5px 15px;
-            border-radius: 20px;
+            margin-top: 10px;
+            padding: 6px 16px;
+            border-radius: 12px;
             display: inline-block;
         }
 
         .status-buy { color: var(--success-color); background: rgba(46, 204, 113, 0.1); }
         .status-sell { color: var(--warning-color); background: rgba(231, 76, 60, 0.1); }
-        .status-neutral { color: var(--neutral-color); background: rgba(52, 73, 94, 0.1); }
+        .status-neutral { color: var(--neutral-color); background: rgba(149, 165, 166, 0.1); }
 
-        .price-info {
-            text-align: center;
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
-        
-        .price-value {
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        .meter-container {
-            height: 12px;
-            background: #ecf0f1;
-            border-radius: 6px;
-            position: relative;
-            margin: 30px 0;
-            overflow: hidden;
-        }
-
-        .meter-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success-color) 0%, var(--neutral-color) 50%, var(--warning-color) 100%);
-            width: 100%;
-            opacity: 0.3;
-        }
-
-        .meter-indicator {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: #000;
-            transform: translateX(-50%);
-            transition: left 0.5s ease;
-        }
-
-        .meter-labels {
+        .price-row {
             display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: -25px;
-        }
-
-        .update-time {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #bdc3c7;
-            margin-top: 20px;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.8rem;
-            color: #bdc3c7;
-        }
-        
-        .footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* 新增按钮和说明区域样式 */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
             justify-content: center;
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
-        }
-        
-        .btn-primary:hover {
-            background-color: #2980b9;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
-        }
-        
-        .info-section {
-            /* 移除旧的背景和边框，融入卡片 */
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+            gap: 30px;
+            margin-top: 30px;
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
         }
 
-        .subscribe-hint {
+        .stat-item {
             text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
         }
-        
-        .subscribe-title {
-            font-weight: 600;
-            color: var(--text-color);
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* Side Column */
+        .side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .subscribe-card {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.1) 100%);
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
         }
 
         .subscribe-form {
             display: flex;
-            flex-direction: column; /* 侧边栏宽度有限，改为垂直排列更稳妥 */
+            flex-direction: column;
             gap: 12px;
-            margin-top: 15px;
         }
 
         .subscribe-input {
-            padding: 12px 15px;
+            padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
-            width: 100%;
-            box-sizing: border-box;
-            background: var(--bg-color); /* 输入框背景微调 */
+            border-radius: 10px;
+            background: var(--bg-color);
             color: var(--text-color);
+            font-family: inherit;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
-        
+
         .subscribe-input:focus {
             border-color: var(--primary-color);
-            background: var(--card-bg);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
         .subscribe-btn {
-            background-color: var(--primary-color);
+            padding: 12px;
+            background: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+            border-radius: 10px;
             font-weight: 600;
-            transition: background-color 0.2s, transform 0.1s;
-            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .subscribe-btn:hover {
-            background-color: #2980b9;
+            background: #2980b9;
+            transform: translateY(-1px);
         }
-        
-        .subscribe-btn:active {
-            transform: scale(0.98);
-        }
-        
+
         .subscribe-btn:disabled {
-            background-color: var(--text-secondary);
+            opacity: 0.7;
             cursor: not-allowed;
         }
 
-        .subscribe-hint a {
+        .form-status {
+            font-size: 0.85rem;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+        .form-status.success { color: var(--success-color); }
+        .form-status.error { color: var(--warning-color); }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding-bottom: 20px;
+        }
+
+        .footer a {
             color: var(--primary-color);
-            font-weight: 600;
             text-decoration: none;
         }
-        
-        .form-status {
-            margin-top: 10px;
-            height: 20px; /* 占位防止抖动 */
-            font-weight: 600;
-            opacity: 0;
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
             transition: opacity 0.3s;
         }
-        
-        .form-status.success {
-            color: var(--success-color);
-            opacity: 1;
-        }
-        
-        .form-status.error {
-            color: var(--warning-color);
-            opacity: 1;
-        }
-        
-        details summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 5px;
-            list-style: none; /* 隐藏默认三角 */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .hidden { opacity: 0; pointer-events: none; }
 
-        details summary::after {
-            content: '+';
-            font-size: 1.2rem;
-            font-weight: 300;
-        }
-
-        details[open] summary::after {
-            content: '-';
-        }
-        
-        details p, details ul {
-            margin-top: 10px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-        }
-
-        /* Loading state */
-        .loading {
-            opacity: 0.5;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>红利低波ETF (512890)</h1>
-            <div class="subtitle">RSI 趋势监控面板</div>
+            <div class="header-title">
+                <h1>红利低波ETF (512890)</h1>
+                <div class="subtitle">RSI 趋势智能监控面板</div>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="update-time-badge">更新中...</span>
+            </div>
         </header>
 
-        <div class="dashboard-layout">
-            <!-- 左侧：核心监控数据 -->
-            <main class="main-column">
-                <div class="dashboard-card" id="main-card">
-                    <div class="rsi-display">
-                        <div class="rsi-label">RSI (14天)</div>
-                        <div class="rsi-value" id="rsi-value">--</div>
-                        <div class="rsi-status" id="rsi-status">正在加载...</div>
-                    </div>
-
-                    <div class="price-info">
-                        当前价格: <span class="price-value" id="price-value">--</span>
-                    </div>
-
-                    <div class="meter-container">
-                        <div class="meter-bar"></div>
-                        <div class="meter-indicator" id="meter-indicator" style="left: 50%;"></div>
-                    </div>
-                    <div class="meter-labels">
-                        <span>0 (超卖)</span>
-                        <span>50</span>
-                        <span>100 (超买)</span>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank" class="btn btn-primary">
-                            📈 查看实时图表 (Investing.com)
-                        </a>
-                    </div>
-
-                    <div class="update-time" id="update-time">
-                        上次更新: --
-                    </div>
-                </div>
-            </main>
-
-            <!-- 右侧：辅助信息与订阅 -->
-            <aside class="side-column">
-                <!-- RSI 说明卡片 -->
-                <div class="dashboard-card side-card">
-                    <div class="info-section">
-                        <details open>
-                            <summary>💡 什么是 RSI 指标？</summary>
-                            <p>相对强弱指数 (RSI) 是衡量价格变动速度和变化的动量指标，范围在 0 到 100 之间。</p>
-                            <ul style="padding-left: 20px; margin-bottom: 0;">
-                                <li><strong style="color: var(--success-color)">RSI < 40 (超卖)</strong>: 市场可能过度下跌，存在反弹或买入机会。</li>
-                                <li><strong style="color: var(--warning-color)">RSI > 70 (超买)</strong>: 市场可能过度上涨，存在回调或卖出风险。</li>
-                                <li><strong>40 - 70 (中性)</strong>: 市场处于正常波动范围，建议观望。</li>
-                            </ul>
-                        </details>
-                    </div>
+        <div class="dashboard-grid">
+            <!-- Left Column: Main Monitor -->
+            <div class="card rsi-card">
+                <div class="loading-overlay" id="loading-overlay">
+                    <div>加载数据中...</div>
                 </div>
 
-                <!-- 订阅卡片 -->
-                <div class="dashboard-card side-card">
-                    <div class="subscribe-hint">
-                        <div class="subscribe-title">
-                            <span>🔔</span> 订阅买卖点邮件提醒
-                        </div>
-                        <form id="subscribe-form" action="https://formspree.io/f/xzzqlybo" method="POST" class="subscribe-form">
-                            <input type="email" name="email" class="subscribe-input" placeholder="您的邮箱地址" required>
-                            <button type="submit" class="subscribe-btn">立即订阅</button>
-                        </form>
-                        <div id="form-status" class="form-status"></div>
-                        <div style="font-size: 0.75rem; margin-top: 15px; opacity: 0.7;">
-                            提交后请留意作者审核，或直接联系 <a href="mailto:pear56@126.com">pear56@126.com</a>
+                <div class="gauge-container">
+                    <div class="gauge-bg"></div>
+                    <div class="gauge-needle" id="gauge-needle"></div>
+                    <div class="gauge-center-dot"></div>
+                </div>
+
+                <div class="rsi-value-display">
+                    <div class="rsi-number" id="rsi-value">--</div>
+                </div>
+                
+                <div class="rsi-status-text" id="rsi-status">等待数据...</div>
+
+                <div class="price-row">
+                    <div class="stat-item">
+                        <div class="stat-label">当前价格</div>
+                        <div class="stat-value" id="price-value">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">操作建议</div>
+                        <div class="stat-value" style="font-size: 1rem; display: flex; align-items: center; height: 100%;">
+                            <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">
+                                查看K线图 &rarr;
+                            </a>
                         </div>
                     </div>
                 </div>
-            </aside>
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="side-column">
+                <!-- Subscribe Card -->
+                <div class="card subscribe-card">
+                    <div class="card-title">
+                        <span>🔔</span> 邮件提醒订阅
+                    </div>
+                    <form id="subscribe-form" action="https://formspree.io/f/xzzqlybo" method="POST" class="subscribe-form">
+                        <input type="email" name="email" class="subscribe-input" placeholder="输入您的邮箱地址" required>
+                        <button type="submit" class="subscribe-btn">立即订阅</button>
+                    </form>
+                    <div id="form-status" class="form-status"></div>
+                    <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 5px;">
+                        * 触发买卖点时自动发送邮件通知
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>💡</span> 指标说明
+                    </div>
+                    <ul class="info-list">
+                        <li>
+                            <div class="dot" style="background: var(--success-color)"></div>
+                            <div><strong>RSI < 40 (超卖)</strong><br>市场可能过度下跌，关注买入机会。</div>
+                        </li>
+                        <li>
+                            <div class="dot" style="background: var(--warning-color)"></div>
+                            <div><strong>RSI > 70 (超买)</strong><br>市场可能过度上涨，注意回调风险。</div>
+                        </li>
+                        <li>
+                            <div class="dot" style="background: var(--neutral-color)"></div>
+                            <div><strong>40 - 70 (中性)</strong><br>市场处于正常波动范围，建议观望。</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div class="footer">
-            数据来源: <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank">Investing.com</a> | <a href="https://github.com/Pear56/JTrading" target="_blank">GitHub 项目地址</a>
+            数据来源: Investing.com | Powered by GitHub Actions & Pages
             <br>
-            注意: 本页面为静态快照，更新频率取决于 GitHub Actions 运行间隔。
+            <a href="mailto:pear56@126.com">联系作者</a>
         </div>
     </div>
 
     <script>
-        function updateUI(data) {
-            const rsiValueEl = document.getElementById('rsi-value');
-            const rsiStatusEl = document.getElementById('rsi-status');
-            const priceValueEl = document.getElementById('price-value');
-            const updateTimeEl = document.getElementById('update-time');
-            const meterIndicator = document.getElementById('meter-indicator');
-            const mainCard = document.getElementById('main-card');
+        // UI Elements
+        const els = {
+            rsiValue: document.getElementById('rsi-value'),
+            rsiStatus: document.getElementById('rsi-status'),
+            priceValue: document.getElementById('price-value'),
+            updateBadge: document.getElementById('update-time-badge'),
+            needle: document.getElementById('gauge-needle'),
+            loading: document.getElementById('loading-overlay'),
+            form: document.getElementById('subscribe-form'),
+            formStatus: document.getElementById('form-status')
+        };
 
-            mainCard.classList.remove('loading');
+        function updateUI(data) {
+            els.loading.classList.add('hidden');
 
             if (!data || data.rsi === null || data.rsi === "找不到") {
-                rsiValueEl.textContent = "N/A";
-                rsiStatusEl.textContent = "数据不可用";
-                rsiStatusEl.className = "rsi-status status-neutral";
+                els.rsiValue.textContent = "N/A";
+                els.rsiStatus.textContent = "数据不可用";
                 return;
             }
 
             const rsi = parseFloat(data.rsi);
-            rsiValueEl.textContent = rsi.toFixed(2);
+            els.rsiValue.textContent = rsi.toFixed(2);
 
             // Update Price
-            if (data.price) {
-                priceValueEl.textContent = "¥" + data.price.toFixed(3);
-            } else {
-                priceValueEl.textContent = "--";
-            }
+            els.priceValue.textContent = data.price ? "¥" + data.price.toFixed(3) : "--";
 
-            // Update Status
+            // Update Status & Needle
+            // Needle rotation: 0-100 maps to 0-180 degrees (relative to start point)
+            // Start point is -90deg (left). 
+            // RSI 0 = -90deg. RSI 100 = 90deg.
+            // Formula: -90 + (rsi * 1.8)
+            const rotation = -90 + (Math.max(0, Math.min(100, rsi)) * 1.8);
+            els.needle.style.transform = `rotate(${rotation}deg)`;
+
             if (rsi < 40) {
-                rsiStatusEl.textContent = "建议买入 (超卖)";
-                rsiStatusEl.className = "rsi-status status-buy";
+                els.rsiStatus.textContent = "建议买入 (超卖)";
+                els.rsiStatus.className = "rsi-status-text status-buy";
             } else if (rsi > 70) {
-                rsiStatusEl.textContent = "建议卖出 (超买)";
-                rsiStatusEl.className = "rsi-status status-sell";
+                els.rsiStatus.textContent = "建议卖出 (超买)";
+                els.rsiStatus.className = "rsi-status-text status-sell";
             } else {
-                rsiStatusEl.textContent = "观望 (中性)";
-                rsiStatusEl.className = "rsi-status status-neutral";
+                els.rsiStatus.textContent = "观望 (中性)";
+                els.rsiStatus.className = "rsi-status-text status-neutral";
             }
-
-            // Update Meter
-            // Clamp between 0 and 100
-            const clampedRsi = Math.max(0, Math.min(100, rsi));
-            meterIndicator.style.left = `${clampedRsi}%`;
 
             // Update Time
             let timeStr = data.timestamp || "未知";
-            // 尝试计算相对时间
             try {
-                // 1. 移除后缀
                 let cleanTime = timeStr.replace(" (GitHub Actions)", "").trim();
-                
-                // 2. 构造 ISO 8601 格式并显式指定为北京时间 (+08:00)
-                // 将 "2025-11-26 15:30:00" 转换为 "2025-11-26T15:30:00+08:00"
                 const isoTime = cleanTime.replace(" ", "T") + "+08:00";
-                
                 const updateDate = new Date(isoTime);
                 const now = new Date();
-                
-                // 3. 计算时间差 (毫秒)
-                const diffMs = now - updateDate;
-                const diffMins = Math.floor(diffMs / 60000);
+                const diffMins = Math.floor((now - updateDate) / 60000);
                 
                 if (!isNaN(diffMins)) {
-                    let relativeTime = "";
-                    // 处理时间差
-                    if (diffMins < 1) {
-                        relativeTime = "刚刚";
-                    } else if (diffMins < 60) {
-                        relativeTime = `${diffMins} 分钟前`;
-                    } else {
-                        const diffHours = Math.floor(diffMins / 60);
-                        if (diffHours < 24) {
-                            relativeTime = `${diffHours} 小时前`;
-                        } else {
-                            relativeTime = `${Math.floor(diffHours / 24)} 天前`;
-                        }
-                    }
-                    timeStr += ` (${relativeTime})`;
+                    if (diffMins < 1) timeStr = "刚刚更新";
+                    else if (diffMins < 60) timeStr = `${diffMins} 分钟前更新`;
+                    else if (diffMins < 1440) timeStr = `${Math.floor(diffMins/60)} 小时前更新`;
+                    else timeStr = cleanTime.split(' ')[0];
                 }
-            } catch (e) {
-                console.log("时间解析失败", e);
-            }
+            } catch (e) { console.log(e); }
             
-            updateTimeEl.textContent = "上次更新: " + timeStr;
+            els.updateBadge.textContent = timeStr;
         }
 
         async function fetchData() {
             try {
-                // Fetch from local JSON file generated by GitHub Action
                 const response = await fetch('data.json');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network error');
                 const data = await response.json();
                 updateUI(data);
             } catch (error) {
-                console.error('Error fetching data:', error);
-                document.getElementById('rsi-status').textContent = "加载失败";
+                console.error(error);
+                els.rsiStatus.textContent = "加载失败";
+                els.loading.classList.add('hidden');
             }
         }
 
-        // Initial load
-        fetchData();
-
-        // Handle Form Submission via AJAX
-        const form = document.getElementById("subscribe-form");
-        const status = document.getElementById("form-status");
-
-        async function handleSubmit(event) {
-            event.preventDefault();
-            const data = new FormData(event.target);
-            const btn = form.querySelector('button');
-            const originalBtnText = btn.textContent;
+        // Form Handling
+        els.form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = els.form.querySelector('button');
+            const originalText = btn.textContent;
             
             btn.disabled = true;
             btn.textContent = "提交中...";
             
             try {
-                const response = await fetch(event.target.action, {
-                    method: form.method,
-                    body: data,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                const res = await fetch(e.target.action, {
+                    method: 'POST',
+                    body: new FormData(e.target),
+                    headers: { 'Accept': 'application/json' }
                 });
                 
-                if (response.ok) {
-                    status.textContent = "✅ 订阅成功！请等待审核。";
-                    status.className = "form-status success";
-                    form.reset();
+                if (res.ok) {
+                    els.formStatus.textContent = "✅ 订阅成功！";
+                    els.formStatus.className = "form-status success";
+                    els.form.reset();
                 } else {
-                    const errorData = await response.json();
-                    if (Object.hasOwn(errorData, 'errors')) {
-                        status.textContent = "❌ " + errorData["errors"].map(error => error["message"]).join(", ");
-                    } else {
-                        status.textContent = "❌ 提交失败，请稍后重试。";
-                    }
-                    status.className = "form-status error";
+                    const data = await res.json();
+                    els.formStatus.textContent = "❌ " + (data.errors ? data.errors.map(e=>e.message).join(", ") : "提交失败");
+                    els.formStatus.className = "form-status error";
                 }
-            } catch (error) {
-                status.textContent = "❌ 网络错误，请检查连接。";
-                status.className = "form-status error";
+            } catch (err) {
+                els.formStatus.textContent = "❌ 网络错误";
+                els.formStatus.className = "form-status error";
             } finally {
                 btn.disabled = false;
-                btn.textContent = originalBtnText;
-                
-                // 3秒后清除提示
-                setTimeout(() => {
-                    status.className = "form-status";
-                }, 5000);
+                btn.textContent = originalText;
+                setTimeout(() => els.formStatus.textContent = "", 5000);
             }
-        }
-        
-        form.addEventListener("submit", handleSubmit);
+        });
+
+        fetchData();
     </script>
 </body>
 </html>
