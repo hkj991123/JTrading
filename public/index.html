@@ -157,6 +157,80 @@
             text-decoration: none;
         }
 
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* 新增按钮和说明区域样式 */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .info-section {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 5px;
+            list-style: none; /* 隐藏默认三角 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        details summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+        
+        details p, details ul {
+            margin-top: 10px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
         /* Loading state */
         .loading {
             opacity: 0.5;
@@ -191,6 +265,24 @@
                 <span>50</span>
                 <span>100 (超买)</span>
             </div>
+            
+            <div class="action-buttons">
+                <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank" class="btn btn-primary">
+                    📈 查看实时图表 (Investing.com)
+                </a>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <details>
+                <summary>💡 什么是 RSI 指标？</summary>
+                <p>相对强弱指数 (RSI) 是衡量价格变动速度和变化的动量指标，范围在 0 到 100 之间。</p>
+                <ul style="padding-left: 20px; margin-bottom: 0;">
+                    <li><strong style="color: var(--success-color)">RSI < 40 (超卖)</strong>: 市场可能过度下跌，存在反弹或买入机会。</li>
+                    <li><strong style="color: var(--warning-color)">RSI > 70 (超买)</strong>: 市场可能过度上涨，存在回调或卖出风险。</li>
+                    <li><strong>40 - 70 (中性)</strong>: 市场处于正常波动范围，建议观望。</li>
+                </ul>
+            </details>
         </div>
 
         <div class="update-time" id="update-time">
@@ -198,7 +290,7 @@
         </div>
 
         <div class="footer">
-            数据来源: Investing.com | <a href="https://github.com/Pear56/JTrading" target="_blank">GitHub 项目地址</a>
+            数据来源: <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank">Investing.com</a> | <a href="https://github.com/Pear56/JTrading" target="_blank">GitHub 项目地址</a>
             <br>
             注意: 本页面为静态快照，更新频率取决于 GitHub Actions 运行间隔。
         </div>
