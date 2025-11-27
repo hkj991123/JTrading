@@ -24,18 +24,18 @@
 ### 3. 🔔 多渠道即时通知
 - **邮件推送**: 触发买卖阈值时，发送包含详细数据的 **HTML 格式邮件**，内置取消订阅链接。
 - **微信提醒**: 集成 Server酱，支持微信端即时消息推送。
-- **订阅管理**: 内置 Formspree 表单，支持访客自助订阅邮件提醒。
 
-### 4. 📧 灵活的订阅者管理
-- **私有 Gist 存储**: 支持从私有 Gist 动态读取订阅者邮箱列表，添加/删除订阅者无需修改 Secrets。
-- **多种格式支持**: 邮箱列表支持每行一个或逗号分隔，支持 `#` 注释行。
-- **向后兼容**: 如未配置 Gist，自动回退到环境变量 `SUBSCRIBER_EMAILS`。
+### 4. 📧 全自动订阅管理
+- **一键订阅**: 用户在网页填写邮箱后，自动添加到订阅列表，无需人工处理。
+- **Cloudflare Worker**: 通过边缘计算处理订阅请求，秒级响应。
+- **私有 Gist 存储**: 订阅者邮箱安全存储在私有 Gist 中，支持 `#` 注释行。
+- **向后兼容**: 如未配置自动订阅，可手动在 `SUBSCRIBER_EMAILS` 中管理邮箱列表。
 
 ---
 
 ## 🏗️ 系统架构
 
-本系统完全基于 GitHub 免费生态构建，零服务器成本：
+本系统完全基于免费服务构建，零服务器成本：
 
 ```mermaid
 graph LR
@@ -45,8 +45,9 @@ graph LR
     C -->|更新数据| E["生成 data.json"]
     E -->|提交到 main 分支| F["GitHub Pages<br/>(静态托管)"]
     G[用户] -->|访问| F
-    G -->|订阅| H[Formspree]
-    I["私有 Gist<br/>(订阅者列表)"] -.->|读取邮箱| D
+    G -->|订阅| H["Cloudflare Worker"]
+    H -->|写入邮箱| I["私有 Gist<br/>(订阅者列表)"]
+    I -.->|读取邮箱| D
 ```
 
 ## 📂 项目结构
@@ -54,13 +55,16 @@ graph LR
 ```text
 trading_rsi_app/
 ├── .github/workflows/
-│   └── rsi_check.yml       # GitHub Actions 调度配置 (Cron: 0 1-7 * * *)
+│   └── rsi_check.yml        # GitHub Actions 调度配置 (Cron: 0 1-7 * * *)
+├── cloudflare-worker/
+│   ├── worker.js            # Cloudflare Worker 订阅服务
+│   └── wrangler.toml        # Worker 配置文件
 ├── docs/
-│   ├── index.html          # 前端看板 (HTML5 + CSS3 + Vanilla JS)
-│   └── data.json           # (自动生成) 最新监控数据
-├── github_action_runner.py # 核心脚本: 爬虫、计算、通知、生成数据
-├── requirements.txt        # Python 依赖库
-└── README.md               # 项目文档
+│   ├── index.html           # 前端看板 (HTML5 + CSS3 + Vanilla JS)
+│   └── data.json            # (自动生成) 最新监控数据
+├── github_action_runner.py  # 核心脚本: 爬虫、计算、通知、生成数据
+├── requirements.txt         # Python 依赖库
+└── README.md                # 项目文档
 ```
 
 ---
@@ -72,7 +76,7 @@ trading_rsi_app/
 ### 1. Fork 项目
 点击右上角 **Fork** 按钮，将仓库复制到您的 GitHub 账号下。
 
-### 2. 配置 Secrets (敏感信息)
+### 2. 配置 GitHub Secrets
 进入仓库 **Settings** → **Secrets and variables** → **Actions** → **Secrets**，添加以下密钥：
 
 | Secret 名称 | 必填 | 说明 | 示例 |
@@ -80,14 +84,10 @@ trading_rsi_app/
 | `SENDER_EMAIL` | ✅ | 发件人邮箱 (SMTP) | `example@126.com` |
 | `SENDER_PASSWORD` | ✅ | 邮箱 SMTP 授权码 | `abcdefghijklmn` |
 | `SUBSCRIBER_EMAILS` | ⚠️ | 接收通知的邮箱 (英文逗号分隔) | `me@qq.com,you@126.com` |
-| `GIST_SUBSCRIBERS_URL` | ❌ | 私有 Gist 的 Raw URL (推荐) | `https://gist.githubusercontent.com/...` |
-| `GIST_TOKEN` | ❌ | GitHub Personal Access Token (Gist 读取权限) | `ghp_xxxxxxxxxxxx` |
-| `FORMSPREE_ENDPOINT` | ❌ | Formspree 表单地址 | `https://formspree.io/f/xxxx` |
+| `GIST_SUBSCRIBERS_URL` | ❌ | 私有 Gist 的 Raw URL | `https://gist.githubusercontent.com/...` |
+| `GIST_TOKEN` | ❌ | GitHub Token (Gist 只读权限) | `github_pat_xxx` |
+| `SUBSCRIBE_WORKER_URL` | ❌ | Cloudflare Worker 地址 | `https://xxx.workers.dev` |
 | `SERVERCHAN_KEY` | ❌ | Server酱 SendKey (可选) | `SCTxxxxxxxx` |
-
-> **📝 订阅者管理说明**：
-> - **方式一 (简单)**：直接在 `SUBSCRIBER_EMAILS` 中填写邮箱列表，用英文逗号分隔。
-> - **方式二 (推荐)**：配置 `GIST_SUBSCRIBERS_URL` 和 `GIST_TOKEN`，通过私有 Gist 管理订阅者，添加/删除邮箱只需编辑 Gist，无需修改 Secrets。
 
 > **⚠️ 注意**：默认使用 `smtp.126.com`。如需其他邮箱服务商，请额外配置 `SMTP_SERVER` 和 `SMTP_PORT`。
 
@@ -107,36 +107,71 @@ trading_rsi_app/
 
 ---
 
-## 📧 使用私有 Gist 管理订阅者 (推荐)
+## 📧 配置自动订阅功能 (可选但推荐)
 
-如果您希望方便地管理订阅者列表，推荐使用私有 Gist：
+实现用户在网页订阅后，邮箱自动添加到订阅列表。
 
-### 1. 创建私有 Gist
+### 架构说明
+
+```
+用户填写邮箱 → Cloudflare Worker → 写入私有 Gist → RSI 触发时自动发送邮件
+```
+
+### 步骤 1: 创建私有 Gist
+
 1. 访问 [gist.github.com](https://gist.github.com/)
 2. 创建一个 **Secret gist**（私有）：
-   - 文件名：`subscribers.txt`
-   - 内容示例：
+   - **文件名**：`subscribers.txt`
+   - **内容**：
      ```
      # 订阅者邮箱列表（# 开头的为注释）
-     email1@example.com
-     email2@qq.com
-     email3@126.com
+     your_email@example.com
      ```
-3. 创建后，点击 **Raw** 按钮，复制浏览器地址栏中的 URL。
+3. 创建后，记录以下信息：
+   - **Gist ID**：URL 中的 ID（如 `https://gist.github.com/Pear56/abc123` 中的 `abc123`）
+   - **Raw URL**：点击 `Raw` 按钮后的完整 URL
 
-### 2. 创建 Personal Access Token
+### 步骤 2: 创建 GitHub Token
+
+需要创建 **两个 Token**（权限不同）：
+
+#### Token 1: Gist 只读（用于 GitHub Actions 读取订阅列表）
 1. 访问 [GitHub Token 设置](https://github.com/settings/tokens?type=beta)
-2. 点击 **Generate new token** → **Fine-grained token**
-3. 设置权限：**Account permissions** → **Gists** → `Read-only`
-4. 生成并复制 Token
+2. **Generate new token** → **Fine-grained token**
+3. 权限：**Account permissions** → **Gists** → `Read-only`
+4. 生成并复制，添加到 GitHub Secrets 的 `GIST_TOKEN`
 
-### 3. 添加 Secrets
+#### Token 2: Gist 读写（用于 Cloudflare Worker 写入新订阅）
+1. 再次创建一个新 Token
+2. 权限：**Account permissions** → **Gists** → `Read and write`
+3. 生成并复制，稍后配置到 Cloudflare Worker
+
+### 步骤 3: 部署 Cloudflare Worker
+
+1. 访问 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 进入 **Workers & Pages** → **Create** → **Create Worker**
+3. 名称填：`jtrading-subscribe`，点击 **Deploy**
+4. 点击 **Edit code**，将 `cloudflare-worker/worker.js` 的内容粘贴进去
+5. 点击 **Save and Deploy**
+6. 进入 **Settings** → **Variables and Secrets**，添加：
+
+   | 变量名 | 值 | 类型 |
+   |--------|---|------|
+   | `GIST_ID` | Gist URL 中的 ID | Text |
+   | `GIST_FILENAME` | `subscribers.txt` | Text |
+   | `GITHUB_TOKEN` | Gist **读写** Token | **Secret** |
+   | `ALLOWED_ORIGIN` | `https://<你的用户名>.github.io` | Text |
+
+7. 复制 Worker URL（如 `https://jtrading-subscribe.xxx.workers.dev`）
+
+### 步骤 4: 添加 Worker URL 到 GitHub Secrets
+
 在仓库 Secrets 中添加：
-- `GIST_SUBSCRIBERS_URL`：Gist 的 Raw URL
-- `GIST_TOKEN`：刚才生成的 Token
+- `SUBSCRIBE_WORKER_URL`：Worker 的完整 URL
 
 ### ✅ 完成！
-以后添加/删除订阅者，只需编辑 Gist 文件，无需修改任何 Secrets。
+
+手动触发一次 GitHub Actions，前端将自动连接到您的订阅服务。用户订阅后，邮箱会自动添加到 Gist 中。
 
 ---
 
@@ -155,7 +190,7 @@ trading_rsi_app/
     $env:SUBSCRIBER_EMAILS="test@example.com"
     # 或者使用 Gist 方式
     # $env:GIST_SUBSCRIBERS_URL="https://gist.githubusercontent.com/..."
-    # $env:GIST_TOKEN="ghp_xxxxx"
+    # $env:GIST_TOKEN="github_pat_xxxxx"
     ```
 3.  **运行脚本**:
     ```bash
