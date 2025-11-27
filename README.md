@@ -1,6 +1,7 @@
 # 📈 JTrading - 红利低波ETF (512890) 智能监控系统
 
 [![Daily RSI Check](https://github.com/Pear56/JTrading/actions/workflows/rsi_check.yml/badge.svg)](https://github.com/Pear56/JTrading/actions/workflows/rsi_check.yml)
+[![Send Confirmation](https://github.com/Pear56/JTrading/actions/workflows/send_confirmation.yml/badge.svg)](https://github.com/Pear56/JTrading/actions/workflows/send_confirmation.yml)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Deployed-success)](https://pear56.github.io/JTrading/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -28,8 +29,9 @@
 ### 4. 📧 全自动订阅管理
 - **一键订阅**: 用户在网页填写邮箱后，自动添加到订阅列表，无需人工处理。
 - **Cloudflare Worker**: 通过边缘计算处理订阅请求，秒级响应。
+- **自动确认邮件**: 新订阅者在 **1 分钟内** 收到精美的 HTML 确认邮件。
 - **私有 Gist 存储**: 订阅者邮箱安全存储在私有 Gist 中，支持 `#` 注释行。
-- **向后兼容**: 如未配置自动订阅，可手动在 `SUBSCRIBER_EMAILS` 中管理邮箱列表。
+- **双重保险**: 前端支持 Cloudflare Worker + Formspree 双重备份，确保订阅服务稳定。
 
 ---
 
@@ -46,8 +48,10 @@ graph LR
     E -->|提交到 main 分支| F["GitHub Pages<br/>(静态托管)"]
     G[用户] -->|访问| F
     G -->|订阅| H["Cloudflare Worker"]
-    H -->|写入邮箱| I["私有 Gist<br/>(订阅者列表)"]
+    H -->|写入 pending 邮箱| I["私有 Gist<br/>(订阅者列表)"]
     I -.->|读取邮箱| D
+    J["GitHub Actions<br/>(每分钟检测)"] -->|检测 pending| I
+    J -->|发送确认邮件| G
 ```
 
 ## 📂 项目结构
@@ -55,16 +59,18 @@ graph LR
 ```text
 trading_rsi_app/
 ├── .github/workflows/
-│   └── rsi_check.yml        # GitHub Actions 调度配置 (Cron: 0 1-7 * * *)
+│   ├── rsi_check.yml           # RSI 监控调度 (Cron: 0 1-7 * * *)
+│   └── send_confirmation.yml   # 确认邮件发送 (Cron: 每分钟)
 ├── cloudflare-worker/
-│   ├── worker.js            # Cloudflare Worker 订阅服务
-│   └── wrangler.toml        # Worker 配置文件
+│   ├── worker.js               # Cloudflare Worker 订阅服务
+│   └── wrangler.toml           # Worker 配置文件
 ├── docs/
-│   ├── index.html           # 前端看板 (HTML5 + CSS3 + Vanilla JS)
-│   └── data.json            # (自动生成) 最新监控数据
-├── github_action_runner.py  # 核心脚本: 爬虫、计算、通知、生成数据
-├── requirements.txt         # Python 依赖库
-└── README.md                # 项目文档
+│   ├── index.html              # 前端看板 (HTML5 + CSS3 + Vanilla JS)
+│   └── data.json               # (自动生成) 最新监控数据
+├── github_action_runner.py     # 核心脚本: 爬虫、计算、通知、生成数据
+├── send_confirmation.py        # 订阅确认邮件发送脚本
+├── requirements.txt            # Python 依赖库
+└── README.md                   # 项目文档
 ```
 
 ---
@@ -83,11 +89,15 @@ trading_rsi_app/
 | :--- | :--- | :--- | :--- |
 | `SENDER_EMAIL` | ✅ | 发件人邮箱 (SMTP) | `example@126.com` |
 | `SENDER_PASSWORD` | ✅ | 邮箱 SMTP 授权码 | `abcdefghijklmn` |
-| `SUBSCRIBER_EMAILS` | ⚠️ | 接收通知的邮箱 (英文逗号分隔) | `me@qq.com,you@126.com` |
+| `SUBSCRIBER_EMAILS` | ⚠️ | 接收通知的邮箱 (逗号分隔，未配置 Gist 时使用) | `me@qq.com,you@126.com` |
 | `GIST_SUBSCRIBERS_URL` | ❌ | 私有 Gist 的 Raw URL | `https://gist.githubusercontent.com/...` |
-| `GIST_TOKEN` | ❌ | GitHub Token (Gist 只读权限) | `github_pat_xxx` |
+| `GIST_TOKEN` | ❌ | GitHub Token (Gist 只读，用于读取订阅列表) | `github_pat_xxx` |
+| `GIST_TOKEN_WRITE` | ❌ | GitHub Token (Gist 读写，用于更新订阅状态) | `github_pat_xxx` |
+| `GIST_ID` | ❌ | Gist ID (用于确认邮件功能) | `abc123def456` |
+| `GIST_FILENAME` | ❌ | Gist 文件名 | `subscribers.txt` |
 | `SUBSCRIBE_WORKER_URL` | ❌ | Cloudflare Worker 地址 | `https://xxx.workers.dev` |
-| `SERVERCHAN_KEY` | ❌ | Server酱 SendKey (可选) | `SCTxxxxxxxx` |
+| `FORMSPREE_ID` | ❌ | Formspree 表单 ID (备用订阅方案) | `xzzqlybo` |
+| `SERVERCHAN_KEY` | ❌ | Server酱 SendKey (微信通知) | `SCTxxxxxxxx` |
 
 > **⚠️ 注意**：默认使用 `smtp.126.com`。如需其他邮箱服务商，请额外配置 `SMTP_SERVER` 和 `SMTP_PORT`。
 
@@ -107,14 +117,20 @@ trading_rsi_app/
 
 ---
 
-## 📧 配置自动订阅功能 (可选但推荐)
+## 📧 配置自动订阅功能 (推荐)
 
-实现用户在网页订阅后，邮箱自动添加到订阅列表。
+实现用户在网页订阅后，邮箱自动添加到订阅列表，并在 **1 分钟内收到确认邮件**。
 
-### 架构说明
+### 工作流程
 
 ```
-用户填写邮箱 → Cloudflare Worker → 写入私有 Gist → RSI 触发时自动发送邮件
+用户订阅 → Cloudflare Worker → 写入 [pending] email 到 Gist
+                                        ↓
+                              GitHub Actions (每分钟检测)
+                                        ↓
+                              发送 HTML 确认邮件
+                                        ↓
+                              移除 [pending] 标记
 ```
 
 ### 步骤 1: 创建私有 Gist
@@ -141,10 +157,12 @@ trading_rsi_app/
 3. 权限：**Account permissions** → **Gists** → `Read-only`
 4. 生成并复制，添加到 GitHub Secrets 的 `GIST_TOKEN`
 
-#### Token 2: Gist 读写（用于 Cloudflare Worker 写入新订阅）
+#### Token 2: Gist 读写（用于 Worker 写入 + Actions 更新状态）
 1. 再次创建一个新 Token
 2. 权限：**Account permissions** → **Gists** → `Read and write`
-3. 生成并复制，稍后配置到 Cloudflare Worker
+3. 生成并复制，添加到：
+   - GitHub Secrets 的 `GIST_TOKEN_WRITE`
+   - Cloudflare Worker 的 `GITHUB_TOKEN`
 
 ### 步骤 3: 部署 Cloudflare Worker
 
@@ -164,14 +182,32 @@ trading_rsi_app/
 
 7. 复制 Worker URL（如 `https://jtrading-subscribe.xxx.workers.dev`）
 
-### 步骤 4: 添加 Worker URL 到 GitHub Secrets
+### 步骤 4: 添加 Secrets 到 GitHub
 
-在仓库 Secrets 中添加：
-- `SUBSCRIBE_WORKER_URL`：Worker 的完整 URL
+在仓库 Secrets 中添加以下内容：
+
+| Secret 名称 | 值 |
+|------------|---|
+| `SUBSCRIBE_WORKER_URL` | Worker 的完整 URL |
+| `GIST_ID` | 你的 Gist ID |
+| `GIST_FILENAME` | `subscribers.txt` |
+| `GIST_TOKEN_WRITE` | Gist 读写 Token |
 
 ### ✅ 完成！
 
-手动触发一次 GitHub Actions，前端将自动连接到您的订阅服务。用户订阅后，邮箱会自动添加到 Gist 中。
+手动触发一次 GitHub Actions，前端将自动连接到您的订阅服务。新订阅者将在 **1 分钟内** 收到精美的 HTML 确认邮件！
+
+---
+
+## 🔄 备用订阅方案 (Formspree)
+
+如果不想配置 Cloudflare Worker，可以使用 Formspree 作为备用方案：
+
+1. 访问 [formspree.io](https://formspree.io) 注册
+2. 创建表单，获取表单 ID（如 `xzzqlybo`）
+3. 添加到 GitHub Secrets：`FORMSPREE_ID`
+
+> **注意**：Formspree 只收集邮箱，不会自动添加到订阅列表，需要手动处理。
 
 ---
 
