@@ -193,9 +193,9 @@ def main():
     # ==========================================
     # 生成静态数据文件 (供 GitHub Pages 使用)
     # ==========================================
-    public_dir = "public"
-    if not os.path.exists(public_dir):
-        os.makedirs(public_dir)
+    docs_dir = "docs"
+    if not os.path.exists(docs_dir):
+        os.makedirs(docs_dir)
     
     # GitHub Actions 运行在 UTC 时区，需要转换为北京时间 (UTC+8)
     beijing_time = datetime.utcnow() + timedelta(hours=8)
@@ -206,9 +206,9 @@ def main():
         "timestamp": beijing_time.strftime("%Y-%m-%d %H:%M:%S") + " (GitHub Actions)"
     }
     
-    with open(os.path.join(public_dir, "data.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(docs_dir, "data.json"), "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"静态数据已保存至 {public_dir}/data.json")
+    print(f"静态数据已保存至 {docs_dir}/data.json")
 
     # ==========================================
     # 动态注入 Formspree Endpoint (从环境变量)
@@ -218,7 +218,7 @@ def main():
     # 这里为了演示，如果未设置则不替换（前端会提交失败，或者你可以设置一个默认测试地址）
     
     if formspree_endpoint:
-        index_path = os.path.join(public_dir, "index.html")
+        index_path = os.path.join(docs_dir, "index.html")
         if os.path.exists(index_path):
             try:
                 with open(index_path, "r", encoding="utf-8") as f:

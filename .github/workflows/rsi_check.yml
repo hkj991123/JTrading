@@ -40,10 +40,10 @@ jobs:
         # SMTP_PORT: ${{ secrets.SMTP_PORT }}
       run: python github_action_runner.py
 
-    - name: Commit data.json to public folder
+    - name: Commit data.json to docs folder
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add public/data.json
+        git add docs/data.json
         git diff --staged --quiet || git commit -m "Update RSI data [skip ci]"
         git push
