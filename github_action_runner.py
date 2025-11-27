@@ -250,26 +250,24 @@ def main():
     print(f"静态数据已保存至 {docs_dir}/data.json")
 
     # ==========================================
-    # 动态注入 Formspree Endpoint (从环境变量)
+    # 动态注入订阅服务地址 (从环境变量)
     # ==========================================
-    formspree_endpoint = os.environ.get("FORMSPREE_ENDPOINT")
-    # 如果本地运行且未设置环境变量，可以使用默认值或保持占位符
-    # 这里为了演示，如果未设置则不替换（前端会提交失败，或者你可以设置一个默认测试地址）
+    subscribe_worker_url = os.environ.get("SUBSCRIBE_WORKER_URL")
     
-    if formspree_endpoint:
+    if subscribe_worker_url:
         index_path = os.path.join(docs_dir, "index.html")
         if os.path.exists(index_path):
             try:
                 with open(index_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 
-                if "__FORMSPREE_ENDPOINT__" in content:
-                    new_content = content.replace("__FORMSPREE_ENDPOINT__", formspree_endpoint)
+                if "__SUBSCRIBE_WORKER_URL__" in content:
+                    new_content = content.replace("__SUBSCRIBE_WORKER_URL__", subscribe_worker_url)
                     with open(index_path, "w", encoding="utf-8") as f:
                         f.write(new_content)
-                    print(f"已将 index.html 中的 Formspree 地址更新为: {formspree_endpoint}")
+                    print(f"已将 index.html 中的订阅服务地址更新为: {subscribe_worker_url}")
                 else:
-                    print("index.html 中未找到 __FORMSPREE_ENDPOINT__ 占位符，跳过替换。")
+                    print("index.html 中未找到 __SUBSCRIBE_WORKER_URL__ 占位符，跳过替换。")
             except Exception as e:
                 print(f"更新 index.html 失败: {e}")
 

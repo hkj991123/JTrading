@@ -461,7 +461,7 @@
                     <div class="card-title">
                         <span>🔔</span> 邮件提醒订阅
                     </div>
-                    <form id="subscribe-form" action="https://formspree.io/f/xzzqlybo" method="POST" class="subscribe-form">
+                    <form id="subscribe-form" data-action="__SUBSCRIBE_WORKER_URL__" method="POST" class="subscribe-form">
                         <input type="email" name="email" class="subscribe-input" placeholder="输入您的邮箱地址" required>
                         <button type="submit" class="subscribe-btn">立即订阅</button>
                     </form>
@@ -602,33 +602,40 @@
         }
 
         // Form Handling
+        const SUBSCRIBE_URL = els.form.dataset.action;
+        
         els.form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const btn = els.form.querySelector('button');
             const originalText = btn.textContent;
+            const emailInput = els.form.querySelector('input[name="email"]');
             
             btn.disabled = true;
             btn.textContent = "提交中...";
             
             try {
-                const res = await fetch(e.target.action, {
+                const res = await fetch(SUBSCRIBE_URL, {
                     method: 'POST',
-                    body: new FormData(e.target),
-                    headers: { 'Accept': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' 
+                    },
+                    body: JSON.stringify({ email: emailInput.value })
                 });
                 
-                if (res.ok) {
-                    els.formStatus.textContent = "✅ 订阅成功！";
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    els.formStatus.textContent = "✅ " + (data.message || "订阅成功！");
                     els.formStatus.className = "form-status success";
                     els.form.reset();
                 } else {
-                    const data = await res.json();
-                    els.formStatus.textContent = "❌ " + (data.errors ? data.errors.map(e=>e.message).join(", ") : "提交失败");
+                    els.formStatus.textContent = "❌ " + (data.error || data.message || "提交失败");
                     els.formStatus.className = "form-status error";
                 }
             } catch (err) {
                 console.error('Submission error:', err);
-                els.formStatus.textContent = "❌ 网络错误 (详情见控制台)";
+                els.formStatus.textContent = "❌ 网络错误，请稍后重试";
                 els.formStatus.className = "form-status error";
             } finally {
                 btn.disabled = false;
