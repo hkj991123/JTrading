@@ -461,7 +461,7 @@
                     <div class="card-title">
                         <span>🔔</span> 邮件提醒订阅
                     </div>
-                    <form id="subscribe-form" data-action="__SUBSCRIBE_WORKER_URL__" method="POST" class="subscribe-form">
+                    <form id="subscribe-form" data-action="https://jtrading-subscribe.pear56.workers.dev/" method="POST" class="subscribe-form">
                         <input type="email" name="email" class="subscribe-input" placeholder="输入您的邮箱地址" required>
                         <button type="submit" class="subscribe-btn">立即订阅</button>
                     </form>
@@ -602,8 +602,8 @@
         }
 
         // Form Handling - 双重保险：Worker 优先，Formspree 备用
-        const WORKER_URL = '__SUBSCRIBE_WORKER_URL__';
-        const FORMSPREE_URL = 'https://formspree.io/f/__FORMSPREE_ID__'; // 备用方案
+        const WORKER_URL = 'https://jtrading-subscribe.pear56.workers.dev/';
+        const FORMSPREE_URL = 'https://formspree.io/f/xzzqlybo'; // 备用方案
         
         async function submitToWorker(email) {
             const res = await fetch(WORKER_URL, {
@@ -623,7 +623,7 @@
         
         async function submitToFormspree(email) {
             // 检查 Formspree 是否配置
-            if (FORMSPREE_URL.includes('__FORMSPREE_ID__')) {
+            if (FORMSPREE_URL.includes('xzzqlybo')) {
                 throw new Error('订阅服务暂未开放，请稍后再试');
             }
             const res = await fetch(FORMSPREE_URL, {
@@ -653,7 +653,7 @@
             try {
                 let message;
                 // 优先尝试 Worker
-                if (WORKER_URL && !WORKER_URL.includes('__SUBSCRIBE_WORKER_URL__')) {
+                if (WORKER_URL && !WORKER_URL.includes('https://jtrading-subscribe.pear56.workers.dev/')) {
                     try {
                         message = await submitToWorker(email);
                     } catch (workerErr) {
