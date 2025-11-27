@@ -4,34 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JTrading - 智能交易信号</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233498db%22/><text x=%2250%22 y=%2265%22 font-size=%2250%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>JT</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23a08050%22/><text x=%2250%22 y=%2265%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23fff%22 text-anchor=%22middle%22>JT</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #3498db;
-            --success-color: #2ecc71;
-            --warning-color: #e74c3c;
-            --neutral-color: #95a5a6;
-            --bg-color: #f4f6f9;
+            --primary-color: #a08050;
+            --primary-light: #c9a962;
+            --primary-dark: #7a6040;
+            --success-color: #5a8a6a;
+            --warning-color: #a05050;
+            --neutral-color: #8a8070;
+            --bg-color: #faf9f7;
             --card-bg: #ffffff;
-            --text-color: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --shadow-color: rgba(0,0,0,0.08);
-            --border-color: #ecf0f1;
+            --text-color: #3a352d;
+            --text-secondary: #7a7060;
+            --shadow-color: rgba(80,60,30,0.08);
+            --border-color: #e8e4dc;
+            --gold-accent: #b09060;
+            --accent-bg: rgba(160,128,80,0.04);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --primary-color: #5dade2;
-                --success-color: #4cd137;
-                --warning-color: #ff6b6b;
-                --neutral-color: #7f8c8d;
-                --bg-color: #1a1d21;
-                --card-bg: #2c3035;
-                --text-color: #ecf0f1;
-                --text-secondary: #bdc3c7;
-                --shadow-color: rgba(0,0,0,0.3);
-                --border-color: #34495e;
+                --primary-color: #c9a962;
+                --primary-light: #d4b878;
+                --primary-dark: #a08050;
+                --success-color: #6a9a7a;
+                --warning-color: #c07070;
+                --neutral-color: #8a8070;
+                --bg-color: #18171a;
+                --card-bg: #222124;
+                --text-color: #e8e4dc;
+                --text-secondary: #a09888;
+                --shadow-color: rgba(0,0,0,0.35);
+                --border-color: #3a3835;
+                --gold-accent: #c9a962;
+                --accent-bg: rgba(200,170,100,0.06);
             }
         }
 
@@ -66,6 +74,7 @@
             margin: 0;
             font-size: 1.5rem;
             font-weight: 700;
+            color: var(--text-color);
         }
 
         .header-title .subtitle {
@@ -90,14 +99,13 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--success-color);
-            animation: pulse 2s infinite;
+            background-color: var(--gold-accent);
+            animation: pulse 3s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
-            70% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
         }
 
         /* Grid Layout */
@@ -116,9 +124,9 @@
         /* Cards */
         .card {
             background: var(--card-bg);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 10px 30px var(--shadow-color);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px var(--shadow-color);
             border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
@@ -152,23 +160,22 @@
 
         .ring-bg {
             fill: none;
-            stroke: var(--bg-color); /* Use page bg color for track */
-            stroke-width: 12;
+            stroke: var(--border-color);
+            stroke-width: 10;
         }
 
         /* Dark mode adjustment for ring track */
         @media (prefers-color-scheme: dark) {
             .ring-bg {
-                stroke: rgba(255,255,255,0.05);
+                stroke: var(--border-color);
             }
         }
 
         .ring-progress {
             fill: none;
-            stroke-width: 12;
+            stroke-width: 10;
             stroke-linecap: round;
-            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
-            filter: drop-shadow(0 0 4px rgba(0,0,0,0.1));
+            transition: stroke-dashoffset 1s ease-out, stroke 0.3s ease;
         }
 
         .ring-content {
@@ -181,11 +188,11 @@
         }
 
         .rsi-number {
-            font-size: 3.5rem;
-            font-weight: 800;
+            font-size: 3.2rem;
+            font-weight: 700;
             line-height: 1;
             color: var(--text-color);
-            letter-spacing: -2px;
+            letter-spacing: -1px;
         }
 
         .rsi-label-inner {
@@ -211,18 +218,18 @@
 
         .status-buy { 
             color: var(--success-color); 
-            background: rgba(46, 204, 113, 0.08); 
-            border-color: rgba(46, 204, 113, 0.2);
+            background: rgba(90, 138, 106, 0.1); 
+            border-color: rgba(90, 138, 106, 0.2);
         }
         .status-sell { 
             color: var(--warning-color); 
-            background: rgba(231, 76, 60, 0.08); 
-            border-color: rgba(231, 76, 60, 0.2);
+            background: rgba(160, 80, 80, 0.1); 
+            border-color: rgba(160, 80, 80, 0.2);
         }
         .status-neutral { 
             color: var(--neutral-color); 
-            background: rgba(149, 165, 166, 0.08); 
-            border-color: rgba(149, 165, 166, 0.2);
+            background: rgba(138, 128, 112, 0.1); 
+            border-color: rgba(138, 128, 112, 0.2);
         }
 
         .market-info {
@@ -260,23 +267,21 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 30px;
-            background-color: transparent;
+            padding: 11px 28px;
+            background: transparent;
             color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-            border-radius: 12px;
-            font-weight: 600;
+            border: 1.5px solid var(--primary-color);
+            border-radius: 8px;
+            font-weight: 500;
             text-decoration: none;
             transition: all 0.2s ease;
             width: 80%;
-            max-width: 300px;
+            max-width: 280px;
         }
 
         .kline-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            background: var(--primary-color);
+            color: #fff;
         }
 
         /* Side Column */
@@ -292,8 +297,8 @@
         }
 
         .subscribe-card {
-            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.1) 100%);
-            border: 1px solid rgba(52, 152, 219, 0.2);
+            background: var(--accent-bg);
+            border: 1px solid var(--border-color);
         }
 
         .card-title {
@@ -324,23 +329,21 @@
 
         .subscribe-input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
         .subscribe-btn {
-            padding: 12px;
+            padding: 11px;
             background: var(--primary-color);
-            color: white;
+            color: #fff;
             border: none;
-            border-radius: 10px;
-            font-weight: 600;
+            border-radius: 8px;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .subscribe-btn:hover {
-            background: #2980b9;
-            transform: translateY(-1px);
+            background: var(--primary-dark);
         }
 
         .subscribe-btn:disabled {
@@ -387,6 +390,38 @@
         }
 
         .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 16px;
+        }
+        
+        .footer-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        
+        .footer-links a:hover {
+            border-color: var(--primary-color);
             color: var(--primary-color);
             text-decoration: none;
         }
@@ -495,22 +530,29 @@
         </div>
 
         <div class="footer">
-            <div style="margin-bottom: 12px; padding: 10px 20px; background: rgba(231, 76, 60, 0.08); border: 1px solid rgba(231, 76, 60, 0.2); border-radius: 8px; font-size: 0.8rem;">
+            <div style="margin-bottom: 12px; padding: 10px 20px; background: var(--accent-bg); border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.8rem;">
                 ⚠️ 风险提示：本工具仅供学习参考，不构成任何投资建议。投资有风险，入市需谨慎。
             </div>
-            <div style="margin-bottom: 8px;">数据来源: <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank">Investing.com</a> | Powered by <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a> & <a href="https://pages.github.com/" target="_blank">Pages</a></div>
-            <div style="margin-bottom: 8px; font-size: 0.8rem; opacity: 0.7;">
-                订阅服务由 <a href="https://workers.cloudflare.com/" target="_blank">Cloudflare Workers</a> · <a href="https://formspree.io/" target="_blank">Formspree</a> · <a href="https://gist.github.com/" target="_blank">GitHub Gist</a> 提供支持
+            <div style="margin-bottom: 8px; font-size: 0.8rem; color: var(--text-secondary);">
+                数据来源: <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank">Investing.com</a> · Powered by <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a> & <a href="https://pages.github.com/" target="_blank">Pages</a>
             </div>
-            <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
-                <a href="https://github.com/Pear56/JTrading" target="_blank" style="display: inline-flex; align-items: center; gap: 5px;">
-                    <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" style="opacity: 0.8;">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7;">
+                订阅服务由 Cloudflare Workers · Formspree · GitHub Gist 提供支持
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/Pear56/JTrading" target="_blank">
+                    <svg height="14" width="14" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
                     </svg>
                     GitHub 源码
                 </a>
-                <span style="opacity: 0.3">|</span>
-                <a href="mailto:pear56@126.com">联系作者</a>
+                <a href="mailto:pear56@126.com">
+                    <svg height="14" width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    联系作者
+                </a>
             </div>
         </div>
     </div>
@@ -573,7 +615,7 @@
             } else {
                 els.rsiStatus.textContent = "观望 (中性)";
                 els.rsiStatus.className = "rsi-status-text status-neutral";
-                els.ring.style.stroke = "var(--neutral-color)";
+                els.ring.style.stroke = "var(--primary-color)";
             }
 
             // Update Time
