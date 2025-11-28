@@ -529,21 +529,24 @@
                     note: '买入持有，不含分红'
                 },
                 {
-                    name: '沪深300指数',
+                    name: '沪深300ETF (510300)',
                     return: statistics.hs300_return,
                     annual: null,
                     note: '大盘基准'
+                },
+                {
+                    name: '黄金ETF (518880)',
+                    return: statistics.gold_return,
+                    annual: null,
+                    note: '避险资产'
+                },
+                {
+                    name: '纳指ETF (159941)',
+                    return: statistics.nasdaq_return,
+                    annual: null,
+                    note: '美股科技'
                 }
             ];
-
-            if (statistics.ndx_return) {
-                rows.push({
-                    name: '纳指100',
-                    return: statistics.ndx_return,
-                    annual: null,
-                    note: '美股科技基准'
-                });
-            }
 
             tbody.innerHTML = rows.map(row => `
                 <tr class="${row.highlight ? 'highlight' : ''}">
@@ -560,24 +563,23 @@
         function renderChart(daily_values) {
             const ctx = document.getElementById('returnChart').getContext('2d');
             
-            // Sample data for performance (every 5th point)
-            const sampleRate = Math.max(1, Math.floor(daily_values.strategy.length / 500));
+            // Sample data for performance (target ~300 points for smooth display)
+            const sampleRate = Math.max(1, Math.floor(daily_values.strategy.length / 300));
             
-            const strategyData = daily_values.strategy
-                .filter((_, i) => i % sampleRate === 0)
-                .map(d => ({ x: d.date, y: d.return }));
+            // Helper function to sample and align data
+            function sampleData(arr, rate) {
+                if (!arr || arr.length === 0) return [];
+                return arr
+                    .filter((_, i) => i % rate === 0 || i === arr.length - 1)
+                    .map(d => ({ x: d.date, y: d.return }));
+            }
             
-            const buyholdData = daily_values.buyhold
-                .filter((_, i) => i % sampleRate === 0)
-                .map(d => ({ x: d.date, y: d.return }));
-
-            const hs300Data = daily_values.hs300
-                ?.filter((_, i) => i % sampleRate === 0)
-                .map(d => ({ x: d.date, y: d.return })) || [];
-
-            const buyholdNoDivData = daily_values.buyhold_no_div
-                ?.filter((_, i) => i % sampleRate === 0)
-                .map(d => ({ x: d.date, y: d.return })) || [];
+            const strategyData = sampleData(daily_values.strategy, sampleRate);
+            const buyholdData = sampleData(daily_values.buyhold, sampleRate);
+            const buyholdNoDivData = sampleData(daily_values.buyhold_no_div, sampleRate);
+            const hs300Data = sampleData(daily_values.hs300, sampleRate);
+            const goldData = sampleData(daily_values.gold, sampleRate);
+            const nasdaqData = sampleData(daily_values.nasdaq, sampleRate);
 
             if (chartInstance) {
                 chartInstance.destroy();
@@ -585,54 +587,83 @@
 
             // Check dark mode
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
             const textColor = isDark ? '#a09888' : '#7a7060';
+
+            // Build datasets
+            const datasets = [
+                {
+                    label: 'RSI策略',
+                    data: strategyData,
+                    borderColor: '#a08050',
+                    backgroundColor: 'rgba(160,128,80,0.1)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 2.5
+                },
+                {
+                    label: '红利低波(全收益)',
+                    data: buyholdData,
+                    borderColor: '#5a8a6a',
+                    backgroundColor: 'transparent',
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    borderDash: [6, 3]
+                },
+                {
+                    label: '红利低波(价格)',
+                    data: buyholdNoDivData,
+                    borderColor: '#8a8a8a',
+                    backgroundColor: 'transparent',
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 1.5,
+                    borderDash: [3, 3]
+                }
+            ];
+
+            // Add benchmark datasets if data exists
+            if (hs300Data.length > 0) {
+                datasets.push({
+                    label: '沪深300ETF',
+                    data: hs300Data,
+                    borderColor: '#c05050',
+                    backgroundColor: 'transparent',
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 1.5
+                });
+            }
+            
+            if (goldData.length > 0) {
+                datasets.push({
+                    label: '黄金ETF',
+                    data: goldData,
+                    borderColor: '#d4a730',
+                    backgroundColor: 'transparent',
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 1.5
+                });
+            }
+            
+            if (nasdaqData.length > 0) {
+                datasets.push({
+                    label: '纳指ETF',
+                    data: nasdaqData,
+                    borderColor: '#5080c0',
+                    backgroundColor: 'transparent',
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 1.5
+                });
+            }
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    datasets: [
-                        {
-                            label: 'RSI策略',
-                            data: strategyData,
-                            borderColor: '#a08050',
-                            backgroundColor: 'rgba(160,128,80,0.1)',
-                            fill: true,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            borderWidth: 2
-                        },
-                        {
-                            label: '买入持有(全收益)',
-                            data: buyholdData,
-                            borderColor: '#5a8a6a',
-                            backgroundColor: 'transparent',
-                            tension: 0.1,
-                            pointRadius: 0,
-                            borderWidth: 1.5,
-                            borderDash: [5, 5]
-                        },
-                        {
-                            label: '买入持有(价格)',
-                            data: buyholdNoDivData,
-                            borderColor: '#8a8070',
-                            backgroundColor: 'transparent',
-                            tension: 0.1,
-                            pointRadius: 0,
-                            borderWidth: 1,
-                            borderDash: [2, 2]
-                        },
-                        {
-                            label: '沪深300',
-                            data: hs300Data,
-                            borderColor: '#a05050',
-                            backgroundColor: 'transparent',
-                            tension: 0.1,
-                            pointRadius: 0,
-                            borderWidth: 1.5
-                        }
-                    ]
-                },
+                data: { datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -646,13 +677,19 @@
                             labels: {
                                 color: textColor,
                                 usePointStyle: true,
-                                padding: 20
+                                padding: 16,
+                                font: { size: 11 }
                             }
                         },
                         tooltip: {
                             callbacks: {
+                                title: function(items) {
+                                    return items[0]?.raw?.x || '';
+                                },
                                 label: function(context) {
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+                                    const value = context.parsed.y;
+                                    const sign = value >= 0 ? '+' : '';
+                                    return `${context.dataset.label}: ${sign}${value.toFixed(2)}%`;
                                 }
                             }
                         }
@@ -661,19 +698,40 @@
                         x: {
                             type: 'category',
                             grid: {
-                                color: gridColor
+                                color: gridColor,
+                                drawTicks: false
                             },
                             ticks: {
                                 color: textColor,
-                                maxTicksLimit: 10
+                                maxTicksLimit: 8,
+                                maxRotation: 0,
+                                font: { size: 10 },
+                                callback: function(value, index, ticks) {
+                                    // Show only year or year-month for cleaner axis
+                                    const label = this.getLabelForValue(value);
+                                    if (!label) return '';
+                                    const parts = label.split('-');
+                                    if (index === 0 || index === ticks.length - 1) {
+                                        return `${parts[0]}-${parts[1]}`;
+                                    }
+                                    // Show year change
+                                    const prevLabel = index > 0 ? this.getLabelForValue(ticks[index-1].value) : '';
+                                    const prevYear = prevLabel.split('-')[0];
+                                    if (parts[0] !== prevYear) {
+                                        return parts[0];
+                                    }
+                                    return `${parts[1]}月`;
+                                }
                             }
                         },
                         y: {
                             grid: {
-                                color: gridColor
+                                color: gridColor,
+                                drawTicks: false
                             },
                             ticks: {
                                 color: textColor,
+                                font: { size: 10 },
                                 callback: value => value + '%'
                             }
                         }

@@ -19,6 +19,13 @@ RSI_BUY_THRESHOLD = 40
 RSI_SELL_THRESHOLD = 70
 INITIAL_CAPITAL = 100000  # 初始资金10万
 
+# 基准ETF配置
+BENCHMARK_ETFS = {
+    'hs300': {'code': '510300', 'name': '沪深300ETF'},
+    'gold': {'code': '518880', 'name': '黄金ETF'},
+    'nasdaq': {'code': '159941', 'name': '纳指ETF'},
+}
+
 # ============ RSI计算 ============
 def calculate_rsi(prices, period=14):
     """计算RSI指标"""
@@ -66,21 +73,8 @@ def get_etf_data(code):
 def get_etf_dividend(code):
     """获取ETF分红数据"""
     print(f"正在获取 {code} 分红数据...")
-    try:
-        # 尝试获取基金分红数据
-        df = ak.fund_etf_fund_info_em(fund=code, start_date="20140101")
-        if df is not None and len(df) > 0:
-            # 筛选分红记录
-            dividend_df = df[df['业务类型'] == '分红'].copy()
-            if len(dividend_df) > 0:
-                dividend_df['date'] = pd.to_datetime(dividend_df['业务时间'])
-                dividend_df['dividend'] = dividend_df['数值'].astype(float)
-                print(f"获取到 {len(dividend_df)} 条分红记录")
-                return dividend_df[['date', 'dividend']]
-    except Exception as e:
-        print(f"获取分红数据方式1失败: {e}")
     
-    # 备用：手动录入512890已知分红数据
+    # 直接使用已知分红数据（更可靠）
     print("使用已知分红数据...")
     dividend_data = [
         # 512890 历史分红 (每份基金分红金额，元)
@@ -346,32 +340,29 @@ def main():
     
     dividend_df = get_etf_dividend(ETF_CODE)
     
-    # 获取基准数据
-    hs300_df = get_benchmark_data("000300", "沪深300")
-    # 纳指100使用不同接口
-    try:
-        print("正在获取纳指100数据...")
-        ndx_df = ak.index_us_stock_sina(symbol=".NDX")
-        ndx_df['日期'] = pd.to_datetime(ndx_df['日期'])
-        ndx_df = ndx_df.rename(columns={'日期': 'date', '收盘': 'close'})
-        ndx_df = ndx_df.sort_values('date').reset_index(drop=True)
-        print(f"获取到纳指100 {len(ndx_df)} 条数据")
-    except Exception as e:
-        print(f"获取纳指100失败: {e}")
-        ndx_df = None
-    
     # 2. 统一时间范围
     start_date = etf_df['date'].min()
     end_date = etf_df['date'].max()
     print(f"\n回测区间: {start_date.strftime('%Y-%m-%d')} 至 {end_date.strftime('%Y-%m-%d')}")
     
-    # 筛选基准数据到相同时间范围
-    if hs300_df is not None:
-        hs300_df = hs300_df[(hs300_df['date'] >= start_date) & (hs300_df['date'] <= end_date)]
-    if ndx_df is not None:
-        ndx_df = ndx_df[(ndx_df['date'] >= start_date) & (ndx_df['date'] <= end_date)]
+    # 3. 获取基准ETF数据
+    benchmark_data = {}
+    for key, info in BENCHMARK_ETFS.items():
+        print(f"正在获取 {info['name']} ({info['code']}) 数据...")
+        try:
+            df = ak.fund_etf_hist_em(symbol=info['code'], period="daily", adjust="qfq")
+            df['日期'] = pd.to_datetime(df['日期'])
+            df = df.rename(columns={'日期': 'date', '收盘': 'close'})
+            df = df.sort_values('date').reset_index(drop=True)
+            # 筛选到相同时间范围
+            df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
+            benchmark_data[key] = df[['date', 'close']]
+            print(f"  获取到 {len(df)} 条数据")
+        except Exception as e:
+            print(f"  获取失败: {e}")
+            benchmark_data[key] = None
     
-    # 3. 执行回测
+    # 4. 执行回测
     print("\n正在执行RSI策略回测...")
     trades, strategy_values = run_backtest(etf_df, dividend_df)
     
@@ -379,13 +370,22 @@ def main():
     buyhold_values = calculate_buy_and_hold(etf_df, dividend_df)
     
     print("正在计算基准收益...")
-    hs300_values = calculate_benchmark_return(hs300_df)
-    ndx_values = calculate_benchmark_return(ndx_df)
-    
     # 买入持有（不含分红）
     buyhold_no_div = calculate_benchmark_return(etf_df[['date', 'close']])
     
-    # 4. 计算统计指标
+    # 计算各基准收益
+    benchmark_values = {}
+    benchmark_returns = {}
+    for key, df in benchmark_data.items():
+        if df is not None and len(df) > 0:
+            values = calculate_benchmark_return(df)
+            benchmark_values[key] = values
+            benchmark_returns[key] = round(values[-1]['return'], 2) if values else None
+        else:
+            benchmark_values[key] = []
+            benchmark_returns[key] = None
+    
+    # 5. 计算统计指标
     strategy_stats = calculate_statistics(strategy_values, trades)
     buyhold_stats = calculate_statistics(buyhold_values, [])
     
@@ -403,15 +403,12 @@ def main():
     print(f"  总收益率: {buyhold_stats['total_return']:.2f}%")
     print(f"  年化收益: {buyhold_stats['annual_return']:.2f}%")
     
-    if hs300_values:
-        print(f"\n【沪深300】")
-        print(f"  总收益率: {hs300_values[-1]['return']:.2f}%")
+    for key, info in BENCHMARK_ETFS.items():
+        if benchmark_returns.get(key) is not None:
+            print(f"\n【{info['name']}】")
+            print(f"  总收益率: {benchmark_returns[key]:.2f}%")
     
-    if ndx_values:
-        print(f"\n【纳指100】")
-        print(f"  总收益率: {ndx_values[-1]['return']:.2f}%")
-    
-    # 5. 导出数据为JSON
+    # 6. 导出数据为JSON
     output_dir = os.path.dirname(os.path.abspath(__file__))
     output_file = os.path.join(output_dir, "backtest_result.json")
     
@@ -429,17 +426,19 @@ def main():
         'statistics': {
             'strategy': strategy_stats,
             'buyhold': buyhold_stats,
-            'hs300_return': round(hs300_values[-1]['return'], 2) if hs300_values else None,
-            'ndx_return': round(ndx_values[-1]['return'], 2) if ndx_values else None,
-            'buyhold_no_div_return': round(buyhold_no_div[-1]['return'], 2) if buyhold_no_div else None
+            'buyhold_no_div_return': round(buyhold_no_div[-1]['return'], 2) if buyhold_no_div else None,
+            'hs300_return': benchmark_returns.get('hs300'),
+            'gold_return': benchmark_returns.get('gold'),
+            'nasdaq_return': benchmark_returns.get('nasdaq'),
         },
         'trades': trades,
         'daily_values': {
             'strategy': strategy_values,
             'buyhold': buyhold_values,
             'buyhold_no_div': buyhold_no_div,
-            'hs300': hs300_values,
-            'ndx': ndx_values
+            'hs300': benchmark_values.get('hs300', []),
+            'gold': benchmark_values.get('gold', []),
+            'nasdaq': benchmark_values.get('nasdaq', []),
         }
     }
     
