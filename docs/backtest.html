@@ -703,25 +703,10 @@
                             },
                             ticks: {
                                 color: textColor,
-                                maxTicksLimit: 8,
+                                maxTicksLimit: 10,
                                 maxRotation: 0,
-                                font: { size: 10 },
-                                callback: function(value, index, ticks) {
-                                    // Show only year or year-month for cleaner axis
-                                    const label = this.getLabelForValue(value);
-                                    if (!label) return '';
-                                    const parts = label.split('-');
-                                    if (index === 0 || index === ticks.length - 1) {
-                                        return `${parts[0]}-${parts[1]}`;
-                                    }
-                                    // Show year change
-                                    const prevLabel = index > 0 ? this.getLabelForValue(ticks[index-1].value) : '';
-                                    const prevYear = prevLabel.split('-')[0];
-                                    if (parts[0] !== prevYear) {
-                                        return parts[0];
-                                    }
-                                    return `${parts[1]}月`;
-                                }
+                                autoSkip: true,
+                                font: { size: 10 }
                             }
                         },
                         y: {
@@ -743,7 +728,10 @@
         function renderTrades(trades) {
             const tbody = document.getElementById('trades-tbody');
             
-            tbody.innerHTML = trades.map(t => {
+            // 按时间倒序排列（最近的在上面）
+            const sortedTrades = [...trades].reverse();
+            
+            tbody.innerHTML = sortedTrades.map(t => {
                 let actionClass = '';
                 if (t.action === '买入') actionClass = 'action-buy';
                 else if (t.action === '卖出') actionClass = 'action-sell';

@@ -259,11 +259,50 @@ def calculate_buy_and_hold(df, dividend_df, initial_capital=INITIAL_CAPITAL):
     return daily_values
 
 
-def calculate_benchmark_return(df, initial_capital=INITIAL_CAPITAL):
-    """计算基准收益"""
+def calculate_benchmark_return(df, initial_capital=INITIAL_CAPITAL, reference_dates=None):
+    """计算基准收益
+    
+    Args:
+        df: 基准数据DataFrame
+        initial_capital: 初始资金
+        reference_dates: 参考日期列表，用于对齐数据。如果提供，只返回这些日期的数据
+    """
     if df is None or len(df) == 0:
         return []
     
+    # 创建日期到价格的映射
+    date_price_map = {}
+    for _, row in df.iterrows():
+        date_str = row['date'].strftime('%Y-%m-%d')
+        date_price_map[date_str] = row['close']
+    
+    # 如果提供了参考日期，按参考日期对齐
+    if reference_dates:
+        start_price = None
+        daily_values = []
+        
+        for date_str in reference_dates:
+            if date_str in date_price_map:
+                price = date_price_map[date_str]
+                if start_price is None:
+                    start_price = price
+                total_value = initial_capital * (price / start_price)
+                daily_values.append({
+                    'date': date_str,
+                    'total_value': total_value,
+                    'return': (total_value / initial_capital - 1) * 100
+                })
+            # 如果日期不存在，使用前一个值（向前填充）
+            elif daily_values:
+                daily_values.append({
+                    'date': date_str,
+                    'total_value': daily_values[-1]['total_value'],
+                    'return': daily_values[-1]['return']
+                })
+        
+        return daily_values
+    
+    # 原始逻辑
     start_price = df.iloc[0]['close']
     daily_values = []
     
@@ -373,12 +412,15 @@ def main():
     # 买入持有（不含分红）
     buyhold_no_div = calculate_benchmark_return(etf_df[['date', 'close']])
     
-    # 计算各基准收益
+    # 获取策略的日期列表，用于对齐所有基准数据
+    strategy_dates = [d['date'] for d in strategy_values]
+    
+    # 计算各基准收益（使用策略日期对齐）
     benchmark_values = {}
     benchmark_returns = {}
     for key, df in benchmark_data.items():
         if df is not None and len(df) > 0:
-            values = calculate_benchmark_return(df)
+            values = calculate_benchmark_return(df, reference_dates=strategy_dates)
             benchmark_values[key] = values
             benchmark_returns[key] = round(values[-1]['return'], 2) if values else None
         else:
