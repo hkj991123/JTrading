@@ -23,11 +23,12 @@ GIST_TOKEN = os.environ.get("GIST_TOKEN")
 
 # ==========================================
 # 最优策略参数配置 (来自回测优化结果)
-# RSI(15) EMA 32/77 - 联结基金策略
+# RSI(15) EMA 32/77 - 联结基金模式（理论最优）
 # 总收益268.02%, 年化20.90%
+# 注：联结基金可小数份额申购，ETF需100份整手交易
 # ==========================================
-ETF_CODE = "159941"  # 纳指ETF联结基金
-ETF_NAME = "纳指ETF联结基金"
+ETF_CODE = "512890"  # 红利低波ETF
+ETF_NAME = "红利低波ETF"
 RSI_PERIOD = 15  # RSI周期（使用EMA平滑）
 RSI_BUY_THRESHOLD = int(os.environ.get("RSI_BUY_THRESHOLD", 32))  # 买入阈值
 RSI_SELL_THRESHOLD = int(os.environ.get("RSI_SELL_THRESHOLD", 77))  # 卖出阈值
