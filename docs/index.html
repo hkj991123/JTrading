@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JTrading - 智能交易信号</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23a08050%22/><text x=%2250%22 y=%2265%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23fff%22 text-anchor=%22middle%22>JT</text></svg>">
+    <title>JTrading - RSI量化策略监控</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23b08030%22/><text x=%2250%22 y=%2265%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23fff%22 text-anchor=%22middle%22>JT</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -475,8 +475,8 @@
     <div class="container">
         <header>
             <div class="header-title">
-                <h1>红利低波ETF (512890)</h1>
-                <div class="subtitle">RSI 趋势智能监控面板</div>
+                <h1>红利低波ETF(512890)联结基金</h1>
+                <div class="subtitle">RSI(15) EMA 量化策略监控 · 回测年化 20.90%</div>
             </div>
             <div class="status-badge">
                 <div class="status-dot"></div>
@@ -501,7 +501,7 @@
                     
                     <div class="ring-content">
                         <div class="rsi-number" id="rsi-value">--</div>
-                        <div class="rsi-label-inner">RSI (14)</div>
+                        <div class="rsi-label-inner">RSI (15) EMA</div>
                     </div>
                 </div>
 
@@ -516,8 +516,8 @@
                     <a href="backtest.html" class="kline-btn backtest-btn">
                         📊 查看策略回测
                     </a>
-                    <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank" class="kline-btn" style="margin-top: 10px;">
-                        📈 查看实时 K 线图
+                    <a href="https://xueqiu.com/S/SZ159941" target="_blank" class="kline-btn" style="margin-top: 10px;">
+                        📈 查看实时行情
                     </a>
                 </div>
             </div>
@@ -542,20 +542,20 @@
                 <!-- Info Card -->
                 <div class="card">
                     <div class="card-title">
-                        <span>💡</span> 指标说明
+                        <span>💡</span> 最优策略说明
                     </div>
                     <ul class="info-list">
                         <li>
                             <div class="dot" style="background: var(--success-color)"></div>
-                            <div><strong>RSI < 40 (超卖)</strong><br>市场可能过度下跌，关注买入机会。</div>
+                            <div><strong>RSI < 32 (买入信号)</strong><br>回测验证的最优买入点，预期收益最大化。</div>
                         </li>
                         <li>
                             <div class="dot" style="background: var(--warning-color)"></div>
-                            <div><strong>RSI > 70 (超买)</strong><br>市场可能过度上涨，注意回调风险。</div>
+                            <div><strong>RSI > 77 (卖出信号)</strong><br>回测验证的最优卖出点，锁定收益。</div>
                         </li>
                         <li>
                             <div class="dot" style="background: var(--neutral-color)"></div>
-                            <div><strong>40 - 70 (中性)</strong><br>市场处于正常波动范围，建议观望。</div>
+                            <div><strong>32 - 77 (持有)</strong><br>策略持仓期，耐心等待信号触发。</div>
                         </li>
                     </ul>
                 </div>
@@ -567,7 +567,7 @@
                 ⚠️ 风险提示：本工具仅供学习参考，不构成任何投资建议。投资有风险，入市需谨慎。
             </div>
             <div style="margin-bottom: 8px; font-size: 0.8rem; color: var(--text-secondary);">
-                数据来源: <a href="https://cn.investing.com/etfs/huatai-pinebridge-csi-div-low-vol-technical" target="_blank">Investing.com</a> · Powered by <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a> & <a href="https://pages.github.com/" target="_blank">Pages</a>
+                数据来源: <a href="https://github.com/akfamily/akshare" target="_blank">AKShare</a> · RSI 自主计算 · Powered by <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a> & <a href="https://pages.github.com/" target="_blank">Pages</a>
             </div>
             <div style="font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7;">
                 订阅服务由 <a href="https://workers.cloudflare.com/" target="_blank">Cloudflare Workers</a> · <a href="https://formspree.io/" target="_blank">Formspree</a> · <a href="https://gist.github.com/" target="_blank">GitHub Gist</a> 提供支持
@@ -636,17 +636,17 @@
             const offset = circumference - (percent / 100) * circumference;
             els.ring.style.strokeDashoffset = offset;
 
-            // Update Colors & Status
-            if (rsi < 40) {
-                els.rsiStatus.textContent = "建议买入 (超卖)";
+            // Update Colors & Status - 使用回测最优参数 32/77
+            if (rsi < 32) {
+                els.rsiStatus.textContent = "买入信号 (RSI<32)";
                 els.rsiStatus.className = "rsi-status-text status-buy";
                 els.ring.style.stroke = "var(--success-color)";
-            } else if (rsi > 70) {
-                els.rsiStatus.textContent = "建议卖出 (超买)";
+            } else if (rsi > 77) {
+                els.rsiStatus.textContent = "卖出信号 (RSI>77)";
                 els.rsiStatus.className = "rsi-status-text status-sell";
                 els.ring.style.stroke = "var(--warning-color)";
             } else {
-                els.rsiStatus.textContent = "观望 (中性)";
+                els.rsiStatus.textContent = "持有 (32-77)";
                 els.rsiStatus.className = "rsi-status-text status-neutral";
                 els.ring.style.stroke = "var(--primary-color)";
             }

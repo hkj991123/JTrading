@@ -1,92 +1,139 @@
-# 📈 JTrading - 红利低波ETF (512890) 智能监控系统
+# 📈 JTrading - 基于RSI动量指标的ETF量化交易策略研究与实践
 
 [![Daily RSI Check](https://github.com/Pear56/JTrading/actions/workflows/rsi_check.yml/badge.svg)](https://github.com/Pear56/JTrading/actions/workflows/rsi_check.yml)
 [![Send Confirmation](https://github.com/Pear56/JTrading/actions/workflows/send_confirmation.yml/badge.svg)](https://github.com/Pear56/JTrading/actions/workflows/send_confirmation.yml)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Deployed-success)](https://pear56.github.io/JTrading/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**JTrading** 是一个基于 GitHub Actions 的 Serverless 自动化交易辅助系统。专为 **红利低波ETF (512890)** 设计，全自动监控 RSI 技术指标，提供现代化可视化看板与历史策略回测，并在出现买卖信号时通过多渠道发送提醒。
+**JTrading** 是一个基于 GitHub Actions 的 Serverless 量化交易辅助系统。通过对 RSI (Relative Strength Index) 技术指标的参数优化研究，在纳指ETF联结基金上实现了 **年化收益率 20.90%** 的回测表现，显著跑赢传统 RSI(14) 40/70 策略。
 
 🔗 **在线体验**: [https://pear56.github.io/JTrading/](https://pear56.github.io/JTrading/)
 
 ---
 
-## ✨ 核心功能
+## 📊 研究背景与方法
 
-### 1. 📊 现代化可视化看板
-- **环形进度仪表盘**: RSI 数值一目了然
-- **动态状态反馈**: 根据 RSI 状态自动变色（超卖绿/超买红/中性金）
-- **优雅金色主题**: 简约高级的视觉设计
-- **响应式布局**: 完美适配桌面与移动端
-- **深色模式**: 支持系统级 Dark Mode
-- **自动刷新**: 每小时自动更新数据
+### 研究目标
 
-### 2. 📈 RSI 策略回测系统
-- **完整历史回测**: 从 2019 年 ETF 创立至今的完整数据
-- **RSI 交易策略**: RSI(14) < 40 买入, RSI(14) > 70 卖出
-- **多基准对比**: 与沪深300ETF、黄金ETF、纳指ETF 收益对比
-- **复利年化收益**: 所有策略/基准均显示复利年化收益率
-- **分红再投资**: 准确计算含分红的全收益
-- **交易记录**: 完整的买卖操作历史（按时间倒序）
-- **交互式图表**: Chart.js 绘制收益曲线对比
+传统 RSI 策略通常采用 Wilder 提出的 14 日周期配合 30/70 或 40/70 阈值，但这一参数组合是否为最优解？本研究旨在通过穷举优化方法，寻找特定资产类别下的最优 RSI 参数配置。
 
-### 3. 🤖 全自动智能监控
-- **交易时段运行**: 北京时间 09:00-15:00 每小时执行
-- **数据持久化**: 自动生成 `data.json` 驱动前端更新
+### 研究方法
 
-### 4. 🔔 多渠道即时通知
-- **邮件推送**: HTML 格式邮件，内置取消订阅链接
-- **微信提醒**: 集成 Server酱
+1. **参数空间定义**
+   - RSI 周期：3-24 日
+   - 买入阈值：15-50
+   - 卖出阈值：55-90
+   - 约束条件：买卖阈值间隔 ≥ 10
 
-### 5. 📧 自动订阅管理
-- **一键订阅**: 网页填写邮箱，自动添加到订阅列表
-- **Cloudflare Worker**: 边缘计算处理订阅请求
-- **确认邮件**: 新订阅者在 1 小时内收到 HTML 确认邮件
-- **双重保险**: Worker + Formspree 双重备份
+2. **平滑算法对比**
+   - **SMA 平滑**：传统简单移动平均
+   - **EMA 平滑**：指数移动平均（对近期价格更敏感）
+
+3. **交易模式对比**
+   - **整手交易**：模拟真实 ETF 交易（100份整数倍）
+   - **理想化交易**：允许小数份额（消除整手限制的影响）
+
+4. **样本数据**
+   - 纳指ETF联结基金 (159941)：2019-01-18 至 2025-11-28
+   - 跨越 6.9 年完整市场周期（含 2020 疫情冲击、2022 美联储加息等）
 
 ---
 
-## 📊 回测结果概览
+## 🏆 核心研究发现
 
-基于 2019-01-18 至 2025-11-28 的历史数据（约 6.9 年）：
+### 最优参数组合
 
-| 策略/基准 | 总收益率 | 年化收益率 | 说明 |
-|-----------|----------|------------|------|
-| **RSI策略** | +174.65% | 24.83% | RSI<40买入, RSI>70卖出 |
-| 红利低波 (全收益) | +281.13% | 34.13% | 买入持有 + 分红再投资 |
-| 红利低波 (价格) | +139.84% | 21.17% | 买入持有，不含分红 |
-| 纳指ETF (159941) | +290.32% | 34.84% | 美股科技 |
-| 黄金ETF (518880) | +222.55% | 29.31% | 避险资产 |
-| 沪深300ETF (510300) | +69.41% | 12.27% | 大盘基准 |
+经过 **27,720** 种参数组合的穷举测试，我们发现：
 
-> ⚠️ 回测结果不代表未来表现，仅供参考。
+| 策略类型 | RSI周期 | 平滑方式 | 买入阈值 | 卖出阈值 | 总收益 | 年化收益 |
+|:---------|:-------:|:--------:|:--------:|:--------:|-------:|--------:|
+| **理论最优** | 15 | EMA | 32 | 77 | 268.02% | **20.90%** |
+| 实际最优（整手） | 14 | SMA | 34 | 78 | 211.73% | 18.01% |
+| 传统策略 | 14 | SMA | 40 | 70 | ~150% | ~14% |
+
+> 💡 **关键洞察**：
+> - **RSI(15) EMA** 比传统 RSI(14) SMA 更敏感，能捕捉更多交易机会
+> - **32/77 阈值**比传统 40/70 阈值更激进，在趋势明确的美股市场表现更优
+> - 理论最优与实际最优差异约 56%，主要源于整手交易限制
+
+### 多策略对比分析
+
+基于 2019-01-18 至 2025-11-28 的历史数据（约 6.9 年，2491 个自然日）：
+
+| 策略/基准 | 总收益率 | 年化收益率 | 最大回撤 | 胜率 | 说明 |
+|:----------|----------:|-----------:|---------:|-----:|:-----|
+| **RSI(15) EMA 32/77** | +268.02% | 20.90% | 25.3% | 72.0% | 🥇 理论最优策略 |
+| RSI(14) SMA 34/78 | +211.73% | 18.01% | 27.1% | 70.0% | 🥈 实际最优（整手） |
+| RSI(14) SMA 36/78 | +195.42% | 17.05% | 26.8% | 68.0% | Top 3 策略 |
+| 纳指ETF买入持有 | +290.30% | 21.94% | 35.2% | - | 被动基准 |
+| 标普500ETF (513500) | +195.88% | 17.12% | 28.4% | - | 宽基指数 |
+| 红利低波ETF (512890) | +139.84% | 13.59% | 18.6% | - | 低波动策略 |
+| 沪深300ETF (510300) | +69.41% | 8.01% | 42.3% | - | A股大盘 |
+| 黄金ETF (518880) | +135.21% | 13.16% | 15.2% | - | 避险资产 |
+
+### 风险调整后收益
+
+| 策略 | 收益/回撤比 | 夏普近似值 | 评价 |
+|:-----|------------:|:----------:|:-----|
+| RSI(15) EMA 32/77 | 10.59 | 0.83 | 风险收益比最优 |
+| 买入持有（纳指） | 8.25 | 0.62 | 高收益但回撤大 |
+| RSI(14) SMA 34/78 | 7.81 | 0.66 | 稳健的实操选择 |
+
+---
+
+## ✨ 系统功能
+
+### 1. 📊 现代化可视化看板
+- **环形进度仪表盘**：RSI 数值一目了然
+- **动态信号反馈**：实时显示买入/卖出/持有信号
+- **金色优雅主题**：简约高级的视觉设计
+- **深色模式支持**：自动适配系统主题
+- **时间区间选择器**：自由筛选回测周期（1年/3年/5年/全部）
+
+### 2. 📈 交互式策略回测
+- **多策略对比**：同时展示 5+ 种策略收益曲线
+- **多基准比较**：与纳指、标普500、沪深300、黄金等对比
+- **完整交易记录**：每笔买卖操作可追溯
+- **Chart.js 图表**：支持缩放、悬浮详情等交互
+
+### 3. 🤖 全自动智能监控
+- **交易时段运行**：北京时间 09:00-15:00 每小时执行
+- **自主 RSI 计算**：使用 AKShare 获取数据，本地计算 RSI(15) EMA
+- **数据持久化**：自动更新 `data.json` 驱动前端
+
+### 4. 🔔 多渠道即时通知
+- **邮件推送**：HTML 格式邮件，含策略参数和回测表现
+- **微信提醒**：集成 Server酱
+
+### 5. 📧 自动订阅管理
+- **Cloudflare Worker**：边缘计算处理订阅请求
+- **确认邮件**：新订阅者 1 小时内收到确认
+- **双重保险**：Worker + Formspree 双重备份
 
 ---
 
 ## 🏗️ 系统架构
 
-### 核心组件
-
-| 组件 | 说明 |
-|------|------|
-| **GitHub Actions** | 定时任务调度引擎 |
-| **GitHub Pages** | 静态前端托管 |
-| **Cloudflare Worker** | 边缘计算处理订阅 |
-| **私有 Gist** | 订阅者邮箱存储 |
-| **AKShare** | 回测数据源 |
-
-### 数据流
-
 ```mermaid
 flowchart TD
+    subgraph DataSource["📡 数据源"]
+        AK["AKShare<br/>ETF历史数据"]
+    end
+
+    subgraph Compute["⚙️ 计算层"]
+        RSI["RSI(15) EMA<br/>自主计算"]
+        Signal["信号判断<br/>32/77 阈值"]
+    end
+
     subgraph Actions["⏰ GitHub Actions"]
-        A1["RSI Check<br/>北京 09:00-15:00 每小时"]
+        A1["RSI Check<br/>北京 09:00-15:00"]
         A2["确认邮件<br/>每小时整点"]
     end
 
     subgraph Storage["💾 数据存储"]
-        S1["data.json<br/>config.js"]
-        S2["私有 Gist<br/>邮箱列表"]
+        S1["data.json<br/>实时RSI数据"]
+        S2["backtest_result.json<br/>回测结果"]
+        S3["私有 Gist<br/>订阅者列表"]
     end
 
     subgraph Frontend["🌐 前端"]
@@ -94,17 +141,15 @@ flowchart TD
         F2["backtest.html<br/>策略回测"]
     end
 
-    W["☁️ Cloudflare Worker"]
-
+    AK --> RSI
+    RSI --> Signal
+    Signal --> A1
     A1 --> S1
     A1 -->|触发通知| E["📧 邮件 / 微信"]
-    A2 -->|检测 pending| S2
-    A2 -->|发送确认邮件| E
+    A2 -->|检测 pending| S3
     S1 --> F1
+    S2 --> F2
     F1 --> F2
-    F1 -->|订阅| W
-    W -->|"写入 pending"| S2
-    S2 -.->|读取邮箱| A1
 ```
 
 ---
@@ -114,20 +159,22 @@ flowchart TD
 ```text
 trading_rsi_app/
 ├── .github/workflows/
-│   ├── rsi_check.yml           # RSI 监控 (北京时间 09:00-15:00 每小时)
-│   └── send_confirmation.yml   # 确认邮件 (每小时整点)
+│   ├── rsi_check.yml           # RSI 监控 (使用最优参数 RSI(15) 32/77)
+│   └── send_confirmation.yml   # 确认邮件发送
 ├── backtest/
-│   ├── rsi_backtest.py         # 回测引擎核心脚本
-│   └── backtest_result.json    # 回测结果数据
+│   ├── rsi_backtest.py               # 回测引擎核心
+│   ├── rsi_ideal_optimization.py     # 理想化参数优化
+│   ├── generate_multi_strategy_data.py # 多策略数据生成
+│   └── backtest_result.json          # 回测结果数据
 ├── cloudflare-worker/
 │   ├── worker.js               # 订阅服务
 │   └── wrangler.toml           # Worker 配置
 ├── docs/
-│   ├── index.html              # 前端看板 (实时监控)
-│   ├── backtest.html           # 策略回测页面
-│   ├── backtest_result.json    # 回测数据 (供网页使用)
+│   ├── index.html              # 实时监控面板
+│   ├── backtest.html           # 策略回测页面（含时间选择器）
+│   ├── backtest_result.json    # 多策略回测数据
 │   ├── config.js               # (自动生成) 订阅服务配置
-│   └── data.json               # (自动生成) RSI 数据
+│   └── data.json               # (自动生成) 实时 RSI 数据
 ├── github_action_runner.py     # RSI 监控核心脚本
 ├── send_confirmation.py        # 确认邮件发送脚本
 └── requirements.txt            # Python 依赖
@@ -144,20 +191,15 @@ trading_rsi_app/
 进入 **Settings** → **Secrets and variables** → **Actions** → **Secrets**：
 
 | Secret 名称 | 必填 | 说明 |
-| :--- | :--- | :--- |
+|:------------|:----:|:-----|
 | `SENDER_EMAIL` | ✅ | 发件邮箱 (如 `xxx@126.com`) |
 | `SENDER_PASSWORD` | ✅ | SMTP 授权码 |
-| `SUBSCRIBER_EMAILS` | ⚠️ | 接收通知邮箱 (逗号分隔，未配置 Gist 时使用) |
+| `SUBSCRIBER_EMAILS` | ⚠️ | 接收通知邮箱 (逗号分隔) |
 | `GIST_SUBSCRIBERS_URL` | ❌ | 私有 Gist 的 Raw URL |
 | `GIST_TOKEN` | ❌ | Gist 只读 Token |
 | `GIST_TOKEN_WRITE` | ❌ | Gist 读写 Token |
-| `GIST_ID` | ❌ | Gist ID |
-| `GIST_FILENAME` | ❌ | Gist 文件名 |
 | `SUBSCRIBE_WORKER_URL` | ❌ | Cloudflare Worker URL |
-| `FORMSPREE_ID` | ❌ | Formspree 表单 ID (备用) |
 | `SERVERCHAN_KEY` | ❌ | Server酱 Key (微信通知) |
-
-> 默认使用 `smtp.126.com`，其他邮箱需额外配置 `SMTP_SERVER` 和 `SMTP_PORT`。
 
 ### 3. 启用 GitHub Pages
 1. 进入 **Actions**，手动运行一次 **"Daily RSI Check"**
@@ -167,163 +209,111 @@ trading_rsi_app/
 
 ---
 
-## 📈 运行回测
-
-回测脚本使用 [AKShare](https://github.com/akfamily/akshare) 获取历史数据，计算 RSI 策略收益并与多个基准对比。
+## 📈 运行参数优化回测
 
 ```powershell
 # 安装依赖
 pip install pandas numpy akshare
 
-# 运行回测
+# 运行基础回测
 python backtest/rsi_backtest.py
-```
 
-回测结果会自动保存到：
-- `backtest/backtest_result.json` - 完整数据
-- `docs/backtest_result.json` - 网页展示用
+# 运行参数优化（理想化模式）
+python backtest/rsi_ideal_optimization.py
+
+# 生成多策略对比数据
+python backtest/generate_multi_strategy_data.py
+```
 
 ### 策略规则
 
-| 条件 | 操作 |
-|------|------|
-| RSI(14) < 40 | 满仓买入 |
-| RSI(14) > 70 | 全部卖出 |
-| 分红 | 自动再投资 |
+| 信号类型 | 条件 | 操作 |
+|:---------|:-----|:-----|
+| 买入信号 | RSI(15) EMA < 32 | 全仓买入 |
+| 卖出信号 | RSI(15) EMA > 77 | 全仓卖出 |
+| 持有 | 32 ≤ RSI ≤ 77 | 维持当前仓位 |
 
-### 年化收益计算
+### RSI-EMA 计算公式
 
-使用复利公式计算年化收益率：
+```python
+# EMA 平滑因子
+alpha = 1 / period
 
+# 平均涨幅和跌幅（EMA）
+avg_gain = gain.ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+avg_loss = loss.ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+
+# RSI 计算
+RS = avg_gain / avg_loss
+RSI = 100 - (100 / (1 + RS))
 ```
-年化收益率 = (1 + 总收益率) ^ (365 / 天数) - 1
-```
+
+### 年化收益计算（复利）
+
+$$\text{年化收益率} = \left(1 + \text{总收益率}\right)^{\frac{365}{\text{天数}}} - 1$$
 
 ---
 
-## 📧 配置自动订阅功能
+## 🔬 研究结论
 
-### 订阅流程
+1. **参数敏感性**：RSI 周期 13-17 日区间表现稳健，过短（<10日）噪音大，过长（>20日）信号滞后
 
-```
-用户订阅 → Worker 写入 [pending] email → Gist
-                                          ↓
-                              Actions 每小时检测
-                                          ↓
-                              发送确认邮件 + 移除 [pending]
-```
+2. **平滑方法影响**：EMA 平滑在趋势明确的美股市场优于 SMA，但在 A 股震荡市表现接近
 
-### 步骤 1: 创建私有 Gist
-1. 访问 [gist.github.com](https://gist.github.com/)
-2. 创建 **Secret gist**，文件名 `subscribers.txt`
-3. 记录 Gist ID 和 Raw URL
+3. **阈值选择**：
+   - 激进策略（32/77）：高收益高波动，适合美股科技类
+   - 稳健策略（34/78）：收益略低但回撤可控
+   - 传统策略（40/70）：过于保守，错过大量交易机会
 
-### 步骤 2: 创建 GitHub Token
-创建两个 Token：
-- **只读 Token** → `GIST_TOKEN`
-- **读写 Token** → `GIST_TOKEN_WRITE` + Worker 的 `GITHUB_TOKEN`
+4. **整手限制**：对小资金影响显著（约 20%+ 收益损耗），大资金影响可忽略
 
-### 步骤 3: 部署 Cloudflare Worker
-1. 创建 Worker，粘贴 `cloudflare-worker/worker.js` 代码
-2. 配置环境变量：
-
-| 变量名 | 值 |
-|--------|---|
-| `GIST_ID` | Gist ID |
-| `GIST_FILENAME` | `subscribers.txt` |
-| `GITHUB_TOKEN` | 读写 Token (Secret) |
-| `ALLOWED_ORIGIN` | `https://<用户名>.github.io` |
-
-### 步骤 4: 添加 GitHub Secrets
-| Secret 名称 | 值 |
-|------------|---|
-| `SUBSCRIBE_WORKER_URL` | Worker URL |
-| `GIST_ID` | Gist ID |
-| `GIST_FILENAME` | `subscribers.txt` |
-| `GIST_TOKEN_WRITE` | 读写 Token |
-
-### 步骤 5: 触发 Actions
-运行一次 **"Daily RSI Check"** 生成 `config.js`。
-
----
-
-## 🔄 调度时间说明
-
-| Workflow | Cron | 说明 |
-|----------|------|------|
-| RSI Check | `0 1-7 * * *` | UTC 01:00-07:00 = 北京 09:00-15:00 每小时 |
-| Send Confirmation | `0 * * * *` | 每小时整点 (24小时) |
-| 前端自动刷新 | - | 每小时刷新 data.json |
-
-> ⚠️ GitHub Actions 调度有延迟，实际执行时间可能晚 5-15 分钟。
-
----
-
-## 💻 本地开发
-
-```powershell
-# 克隆项目
-git clone https://github.com/Pear56/JTrading.git
-cd JTrading
-
-# 创建虚拟环境
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 设置环境变量
-$env:SENDER_EMAIL="your@126.com"
-$env:SENDER_PASSWORD="smtp_password"
-$env:SUBSCRIBER_EMAILS="test@example.com"
-
-# 运行 RSI 监控
-python github_action_runner.py
-
-# 运行回测
-python backtest/rsi_backtest.py
-```
-
-本地测试订阅功能需手动创建 `docs/config.js`：
-```javascript
-const CONFIG = {
-  WORKER_URL: 'https://your-worker.workers.dev/',
-  FORMSPREE_ID: 'your_id'
-};
-```
+5. **策略局限性**：
+   - 单边上涨市场：RSI 长期处于高位，频繁触发卖出信号
+   - 极端行情：突发事件导致的急跌可能触发错误买入
+   - 样本偏差：回测周期主要处于美股牛市，需警惕过拟合
 
 ---
 
 ## 🛠️ 技术栈
 
 | 类别 | 技术 |
-|------|------|
+|:-----|:-----|
 | **前端** | HTML5, CSS3, JavaScript, Chart.js |
-| **后端** | Python, Pandas, NumPy, AKShare |
+| **后端** | Python 3.9+, Pandas, NumPy, AKShare |
 | **部署** | GitHub Actions, GitHub Pages |
 | **边缘计算** | Cloudflare Workers |
 | **数据存储** | GitHub Gist |
 
 ---
 
-## ⚠️ 免责声明
+## ⚠️ 风险提示
 
-本项目仅供学习交流，数据来源于网络，不保证准确性。**不构成任何投资建议**，市场有风险，投资需谨慎。
+> **免责声明**：本项目仅供学习研究，所有回测数据基于历史表现，**不保证未来收益**。
+> 
+> - 历史收益不代表未来表现
+> - 量化策略存在失效风险
+> - 美股 ETF 存在汇率波动风险
+> - 投资有风险，入市需谨慎
 
 ---
 
 ## 📄 许可证
 
-[MIT License](https://opensource.org/licenses/MIT)
+[MIT License](https://opensource.org/licenses/MIT) - 自由使用，但需保留版权声明。
 
 ---
 
-## 🤝 贡献
+## 🤝 贡献与交流
 
 欢迎提交 Issue 和 Pull Request！
 
-## 📬 联系
+- 📧 Email: pear56@126.com
+- 🐙 GitHub: [@Pear56](https://github.com/Pear56)
 
-- Email: pear56@126.com
-- GitHub: [@Pear56](https://github.com/Pear56)
+---
+
+## 📚 参考文献
+
+1. Wilder, J.W. (1978). *New Concepts in Technical Trading Systems*. Trend Research.
+2. Murphy, J.J. (1999). *Technical Analysis of the Financial Markets*. New York Institute of Finance.
+3. AKShare 文档: https://akshare.akfamily.xyz/

@@ -7,323 +7,534 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23a08050%22/><text x=%2250%22 y=%2265%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23fff%22 text-anchor=%22middle%22>JT</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <style>
         :root {
-            --primary-color: #a08050;
-            --primary-light: #c9a962;
-            --primary-dark: #7a6040;
-            --success-color: #5a8a6a;
-            --warning-color: #a05050;
-            --neutral-color: #8a8070;
-            --bg-color: #faf9f7;
-            --card-bg: #ffffff;
-            --text-color: #3a352d;
-            --text-secondary: #7a7060;
-            --shadow-color: rgba(80,60,30,0.08);
-            --border-color: #e8e4dc;
+            --primary: #9a7b4f;
+            --primary-hover: #b08d5b;
+            --accent: #c9a227;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --success: #2d8659;
+            --success-bg: rgba(45, 134, 89, 0.08);
+            --danger: #c45c5c;
+            --danger-bg: rgba(196, 92, 92, 0.08);
+            --bg: #f5f3f0;
+            --bg-card: #ffffff;
+            --bg-elevated: #faf9f7;
+            --text: #1f1d1a;
+            --text-secondary: #6b6560;
+            --text-muted: #9a948c;
+            --border: #e8e4df;
+            --border-light: #f0ece7;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+            --radius: 12px;
+            --radius-lg: 16px;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --primary-color: #c9a962;
-                --primary-light: #d4b878;
-                --primary-dark: #a08050;
-                --success-color: #6a9a7a;
-                --warning-color: #c07070;
-                --neutral-color: #8a8070;
-                --bg-color: #18171a;
-                --card-bg: #222124;
-                --text-color: #e8e4dc;
-                --text-secondary: #a09888;
-                --shadow-color: rgba(0,0,0,0.35);
-                --border-color: #3a3835;
+                --primary: #c9a052;
+                --primary-hover: #d4ad62;
+                --accent: #e4b82d;
+                --accent-glow: rgba(228, 184, 45, 0.12);
+                --success: #4ead7a;
+                --success-bg: rgba(78, 173, 122, 0.1);
+                --danger: #e07070;
+                --danger-bg: rgba(224, 112, 112, 0.1);
+                --bg: #0f0f10;
+                --bg-card: #1a1a1c;
+                --bg-elevated: #222224;
+                --text: #f0ede8;
+                --text-secondary: #9a948c;
+                --text-muted: #5a5550;
+                --border: #2a2928;
+                --border-light: #1f1e1d;
+                --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+                --shadow: 0 4px 12px rgba(0,0,0,0.3);
+                --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
             }
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
-            padding: 20px;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
+            padding: 24px;
         }
 
         /* Header */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
         }
 
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        header .subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .back-link {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: var(--primary-color);
-            text-decoration: none;
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
-            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header-title .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 2px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-elevated);
+            color: var(--text);
+            border-color: var(--primary);
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
 
         .stat-card {
-            background: var(--card-bg);
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 12px var(--shadow-color);
+            transition: all 0.2s;
         }
 
-        .stat-card .label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
+        .stat-card:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--border-light);
         }
 
-        .stat-card .value {
-            font-size: 1.8rem;
-            font-weight: 700;
+        .stat-card.highlight {
+            background: linear-gradient(135deg, var(--accent-glow), transparent);
+            border-color: var(--accent);
         }
 
-        .stat-card .value.positive { color: var(--success-color); }
-        .stat-card .value.negative { color: var(--warning-color); }
-        .stat-card .value.neutral { color: var(--primary-color); }
-
-        .stat-card .sub {
+        .stat-label {
             font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .stat-value.gold { color: var(--accent); }
+        .stat-value.success { color: var(--success); }
+        .stat-value.danger { color: var(--danger); }
+
+        .stat-sub {
+            font-size: 0.8rem;
             color: var(--text-secondary);
             margin-top: 4px;
         }
 
-        /* Chart Section */
-        .chart-section {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px var(--shadow-color);
+        /* Card Component */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            overflow: hidden;
         }
 
-        .chart-section h2 {
-            font-size: 1.1rem;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-elevated);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .chart-container {
-            position: relative;
-            height: 400px;
+        .card-body {
+            padding: 20px;
         }
 
-        /* Comparison Table */
-        .comparison-section {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px var(--shadow-color);
+        /* Time Range Selector */
+        .time-range-selector {
+            display: flex;
+            gap: 4px;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 4px;
         }
 
-        .comparison-section h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .comparison-table th {
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .comparison-table tbody tr:hover {
-            background: rgba(160,128,80,0.04);
-        }
-
-        .comparison-table .highlight {
-            background: rgba(160,128,80,0.08);
-        }
-
-        .return-positive { color: var(--success-color); font-weight: 600; }
-        .return-negative { color: var(--warning-color); font-weight: 600; }
-
-        /* Trades Table */
-        .trades-section {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px var(--shadow-color);
-        }
-
-        .trades-section h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .trades-table-wrapper {
-            overflow-x: auto;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .trades-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        .trades-table th,
-        .trades-table td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-
-        .trades-table th {
-            position: sticky;
-            top: 0;
-            background: var(--card-bg);
-            font-weight: 600;
+        .time-btn {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
             color: var(--text-secondary);
             font-size: 0.8rem;
-        }
-
-        .trades-table .action-buy {
-            color: var(--success-color);
-            font-weight: 600;
-        }
-
-        .trades-table .action-sell {
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-
-        .trades-table .action-dividend {
-            color: var(--primary-color);
             font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
         }
 
-        /* Strategy Info */
-        .strategy-info {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px var(--shadow-color);
+        .time-btn:hover {
+            color: var(--text);
+            background: var(--bg-card);
         }
 
-        .strategy-info h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 16px;
+        .time-btn.active {
+            background: var(--bg-card);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
         }
 
-        .strategy-rules {
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 380px;
+        }
+
+        .chart-container.small {
+            height: 260px;
+        }
+
+        /* Strategy Rules */
+        .strategy-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
         }
 
-        .rule-card {
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+        @media (max-width: 600px) {
+            .strategy-grid { grid-template-columns: 1fr; }
         }
 
-        .rule-card.buy {
-            background: rgba(90, 138, 106, 0.08);
-            border-color: rgba(90, 138, 106, 0.2);
+        .strategy-rule {
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            border: 1px solid;
         }
 
-        .rule-card.sell {
-            background: rgba(160, 80, 80, 0.08);
-            border-color: rgba(160, 80, 80, 0.2);
+        .strategy-rule.buy {
+            background: var(--success-bg);
+            border-color: rgba(45, 134, 89, 0.2);
         }
 
-        .rule-card h3 {
-            font-size: 0.95rem;
-            margin-bottom: 8px;
+        .strategy-rule.sell {
+            background: var(--danger-bg);
+            border-color: rgba(196, 92, 92, 0.2);
         }
 
-        .rule-card p {
+        .strategy-rule h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .strategy-rule.buy h4 { color: var(--success); }
+        .strategy-rule.sell h4 { color: var(--danger); }
+
+        .strategy-rule p {
             font-size: 0.85rem;
             color: var(--text-secondary);
+        }
+
+        .strategy-rule strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .strategy-meta {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .strategy-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+        }
+
+        .data-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--bg-elevated);
+        }
+
+        .data-table tbody tr.highlight {
+            background: var(--accent-glow);
+        }
+
+        .data-table .positive { color: var(--success); font-weight: 600; }
+        .data-table .negative { color: var(--danger); font-weight: 600; }
+
+        .note-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Trade Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--success), var(--danger));
+            border-radius: 2px;
+        }
+
+        .trade-pair {
+            margin-bottom: 20px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .trade-pair-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .trade-pair-num {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .trade-pair-profit {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 16px;
+        }
+
+        .trade-pair-profit.positive {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .trade-pair-profit.negative {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .trade-item {
+            position: relative;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .trade-item::before {
+            content: '';
+            position: absolute;
+            left: -22px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-card);
+        }
+
+        .trade-item.buy::before { background: var(--success); }
+        .trade-item.sell::before { background: var(--danger); }
+
+        .trade-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .trade-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .trade-item.buy .trade-action {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .trade-item.sell .trade-action {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .trade-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .trade-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .trade-detail {
+            text-align: center;
+            padding: 8px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+        }
+
+        .trade-detail-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .trade-detail-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Two Column Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 800px) {
+            .grid-2 { grid-template-columns: 1fr; }
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            padding: 30px 0;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border-color);
+            padding: 32px 0;
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.8rem;
         }
 
         .footer a {
-            color: var(--primary-color);
+            color: var(--primary);
             text-decoration: none;
         }
 
@@ -331,164 +542,242 @@
             text-decoration: underline;
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 60px;
-            color: var(--text-secondary);
+        .footer-warning {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--danger-bg);
+            border-radius: 8px;
+            color: var(--danger);
+            display: inline-block;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .stat-card .value {
-                font-size: 1.4rem;
-            }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-            .chart-container {
-                height: 300px;
-            }
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        .card, .stat-card { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">← 返回实时监控</a>
-
     <div class="container">
-        <header>
-            <h1>📊 RSI策略回测报告</h1>
-            <div class="subtitle" id="subtitle">红利低波ETF (512890) | 加载中...</div>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">JT</div>
+                <div class="header-title">
+                    <h1>RSI策略回测报告</h1>
+                    <div class="subtitle" id="subtitle">红利低波ETF (512890) | 加载中...</div>
+                </div>
+            </div>
+            <a href="index.html" class="back-btn">← 返回监控</a>
         </header>
 
-        <!-- Key Stats -->
-        <div class="stats-grid" id="stats-grid">
-            <div class="stat-card">
-                <div class="label">策略总收益</div>
-                <div class="value positive" id="stat-return">--</div>
-                <div class="sub" id="stat-annual">年化 --</div>
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card highlight">
+                <div class="stat-label">联结基金策略收益</div>
+                <div class="stat-value gold" id="stat-return">--</div>
+                <div class="stat-sub" id="stat-annual">年化 --</div>
             </div>
             <div class="stat-card">
-                <div class="label">买入持有收益</div>
-                <div class="value neutral" id="stat-buyhold">--</div>
-                <div class="sub">含分红再投资</div>
+                <div class="stat-label">买入持有收益</div>
+                <div class="stat-value" id="stat-buyhold">--</div>
+                <div class="stat-sub">累积型ETF基准</div>
             </div>
             <div class="stat-card">
-                <div class="label">最大回撤</div>
-                <div class="value negative" id="stat-drawdown">--</div>
-                <div class="sub">风险控制</div>
+                <div class="stat-label">最大回撤</div>
+                <div class="stat-value danger" id="stat-drawdown">--</div>
+                <div class="stat-sub">风险控制</div>
             </div>
             <div class="stat-card">
-                <div class="label">交易次数</div>
-                <div class="value neutral" id="stat-trades">--</div>
-                <div class="sub" id="stat-winrate">胜率 --</div>
+                <div class="stat-label">交易次数</div>
+                <div class="stat-value" id="stat-trades">--</div>
+                <div class="stat-sub" id="stat-winrate">胜率 --</div>
             </div>
         </div>
 
         <!-- Strategy Rules -->
-        <div class="strategy-info">
-            <h2>📋 策略规则</h2>
-            <div class="strategy-rules">
-                <div class="rule-card buy">
-                    <h3>✅ 买入条件</h3>
-                    <p>当日 RSI(14) 低于 <strong>40</strong> 时，以收盘价满仓买入</p>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📋 策略规则 · ETF联结基金 RSI(15) 32/77</div>
+            </div>
+            <div class="card-body">
+                <div class="strategy-grid">
+                    <div class="strategy-rule buy">
+                        <h4>● 买入条件</h4>
+                        <p>当日 RSI(15) EMA 低于 <strong>32</strong> 时，以收盘价全仓买入</p>
+                    </div>
+                    <div class="strategy-rule sell">
+                        <h4>● 卖出条件</h4>
+                        <p>当日 RSI(15) EMA 高于 <strong>77</strong> 时，以收盘价全部卖出</p>
+                    </div>
                 </div>
-                <div class="rule-card sell">
-                    <h3>🔴 卖出条件</h3>
-                    <p>当日 RSI(14) 高于 <strong>70</strong> 时，以收盘价全部卖出</p>
+                <div class="strategy-meta">
+                    <span>💰 初始资金：100,000 元</span>
+                    <span>📊 交易方式：ETF联结基金（允许小数份额）</span>
+                    <span>🔬 最优参数：经 28,050 组参数优化</span>
                 </div>
             </div>
-            <p style="margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary);">
-                初始资金：100,000 元 | 分红处理：分红再投资 | 交易成本：未计入
-            </p>
         </div>
 
-        <!-- Chart -->
-        <div class="chart-section">
-            <h2>📈 收益曲线对比</h2>
-            <div class="chart-container">
-                <canvas id="returnChart"></canvas>
+        <!-- Returns Chart -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📈 收益曲线对比</div>
+                <div class="time-range-selector">
+                    <button class="time-btn" data-range="1y">1年</button>
+                    <button class="time-btn" data-range="3y">3年</button>
+                    <button class="time-btn" data-range="5y">5年</button>
+                    <button class="time-btn active" data-range="all">全部</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="returnChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drawdown Chart -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📉 回撤曲线</div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container small">
+                    <canvas id="drawdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Charts -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📊 年度收益对比</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container small">
+                        <canvas id="yearlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">⏱️ 持仓时间分布</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container small">
+                        <canvas id="holdingChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Comparison Table -->
-        <div class="comparison-section">
-            <h2>🏆 策略对比</h2>
-            <table class="comparison-table">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🏆 策略对比</div>
+            </div>
+            <table class="data-table">
                 <thead>
                     <tr>
-                        <th>策略/基准</th>
+                        <th>策略 / 基准</th>
                         <th>总收益率</th>
                         <th>年化收益</th>
                         <th>备注</th>
                     </tr>
                 </thead>
-                <tbody id="comparison-tbody">
-                </tbody>
+                <tbody id="comparison-tbody"></tbody>
             </table>
         </div>
 
-        <!-- Trades -->
-        <div class="trades-section">
-            <h2>📝 交易记录</h2>
-            <div class="trades-table-wrapper">
-                <table class="trades-table">
-                    <thead>
-                        <tr>
-                            <th>日期</th>
-                            <th>操作</th>
-                            <th>价格</th>
-                            <th>数量</th>
-                            <th>金额</th>
-                            <th>RSI</th>
-                            <th>持仓</th>
-                            <th>现金</th>
-                        </tr>
-                    </thead>
-                    <tbody id="trades-tbody">
-                    </tbody>
-                </table>
+        <!-- Trade Timeline -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📝 交易时间轴 · RSI(15) 32/77 联结基金</div>
+            </div>
+            <div class="card-body">
+                <div class="timeline" id="trade-timeline"></div>
             </div>
         </div>
 
-        <div class="footer">
-            <p style="margin-bottom: 10px;">
-                ⚠️ 风险提示：回测结果不代表未来表现，本工具仅供学习参考，不构成任何投资建议。
-            </p>
-            <p>
-                数据来源: <a href="https://github.com/akfamily/akshare" target="_blank">AKShare</a> |
-                <a href="index.html">返回实时监控</a> |
-                <a href="https://github.com/Pear56/JTrading" target="_blank">GitHub</a>
-            </p>
-        </div>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-warning">⚠️ 风险提示：回测结果不代表未来表现，本工具仅供学习参考，不构成任何投资建议</div>
+            <p>数据来源: <a href="https://github.com/akfamily/akshare" target="_blank">AKShare</a> · <a href="index.html">返回实时监控</a> · <a href="https://github.com/Pear56/JTrading" target="_blank">GitHub</a></p>
+        </footer>
     </div>
 
     <script>
         let chartInstance = null;
+        let drawdownChartInstance = null;
+        let yearlyChartInstance = null;
+        let holdingChartInstance = null;
+        let globalData = null;
+        let currentTimeRange = 'all';
 
         async function loadData() {
             try {
                 const response = await fetch('backtest_result.json');
                 if (!response.ok) throw new Error('Data not found');
-                const data = await response.json();
-                renderPage(data);
+                globalData = await response.json();
+                renderPage(globalData);
+                setupTimeRangeButtons();
             } catch (error) {
                 console.error('Failed to load data:', error);
                 document.getElementById('subtitle').textContent = '数据加载失败，请稍后重试';
             }
         }
 
+        function setupTimeRangeButtons() {
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentTimeRange = btn.dataset.range;
+                    renderChart(globalData.daily_values, globalData.trades);
+                });
+            });
+        }
+
+        function filterDataByRange(data, range) {
+            if (!data || data.length === 0 || range === 'all') return data;
+            
+            const endDate = new Date(data[data.length - 1].date);
+            let startDate;
+            
+            switch (range) {
+                case '1y': startDate = new Date(endDate); startDate.setFullYear(startDate.getFullYear() - 1); break;
+                case '3y': startDate = new Date(endDate); startDate.setFullYear(startDate.getFullYear() - 3); break;
+                case '5y': startDate = new Date(endDate); startDate.setFullYear(startDate.getFullYear() - 5); break;
+                default: return data;
+            }
+            
+            const startDateStr = startDate.toISOString().split('T')[0];
+            const filtered = data.filter(d => d.date >= startDateStr);
+            
+            if (filtered.length === 0) return data;
+            
+            // Rebase returns to start from 0
+            const baseReturn = filtered[0].return;
+            return filtered.map(d => ({ ...d, return: d.return - baseReturn }));
+        }
+
         function renderPage(data) {
             const { meta, statistics, trades, daily_values } = data;
-            const stats = statistics.strategy;
+            const stats = statistics.strategy_ideal || statistics.strategy;
 
-            // Update subtitle
-            document.getElementById('subtitle').textContent = 
-                `${meta.etf_name} (${meta.etf_code}) | ${meta.start_date} 至 ${meta.end_date}`;
+            document.getElementById('subtitle').textContent = `${meta.etf_name} (${meta.etf_code}) · ${meta.start_date} 至 ${meta.end_date}`;
 
-            // Update stats
             document.getElementById('stat-return').textContent = `+${stats.total_return}%`;
             document.getElementById('stat-annual').textContent = `年化 ${stats.annual_return}%`;
             document.getElementById('stat-buyhold').textContent = `+${statistics.buyhold.total_return}%`;
@@ -496,269 +785,293 @@
             document.getElementById('stat-trades').textContent = stats.trade_count;
             document.getElementById('stat-winrate').textContent = `胜率 ${stats.win_rate}%`;
 
-            // Render comparison table
             renderComparisonTable(statistics);
-
-            // Render chart
-            renderChart(daily_values);
-
-            // Render trades
+            renderChart(daily_values, trades);
+            renderDrawdownChart(daily_values);
+            renderYearlyChart(daily_values, statistics);
+            renderHoldingChart(trades);
             renderTrades(trades);
         }
 
         function renderComparisonTable(statistics) {
             const tbody = document.getElementById('comparison-tbody');
             const rows = [
-                {
-                    name: 'RSI策略',
-                    return: statistics.strategy.total_return,
-                    annual: statistics.strategy.annual_return,
-                    note: 'RSI<40买入, RSI>70卖出',
-                    highlight: true
-                },
-                {
-                    name: '红利低波ETF (全收益)',
-                    return: statistics.buyhold.total_return,
-                    annual: statistics.buyhold.annual_return,
-                    note: '买入持有 + 分红再投资'
-                },
-                {
-                    name: '红利低波ETF (价格)',
-                    return: statistics.buyhold_no_div_return,
-                    annual: statistics.buyhold_no_div_annual,
-                    note: '买入持有，不含分红'
-                },
-                {
-                    name: '沪深300ETF (510300)',
-                    return: statistics.hs300_return,
-                    annual: statistics.hs300_annual,
-                    note: '大盘基准'
-                },
-                {
-                    name: '黄金ETF (518880)',
-                    return: statistics.gold_return,
-                    annual: statistics.gold_annual,
-                    note: '避险资产'
-                },
-                {
-                    name: '纳指ETF (159941)',
-                    return: statistics.nasdaq_return,
-                    annual: statistics.nasdaq_annual,
-                    note: '美股科技'
-                }
+                { name: 'RSI(15) 32/77 联结基金', return: statistics.strategy_ideal?.total_return, annual: statistics.strategy_ideal?.annual_return, note: 'EMA平滑+小数份额 (理论最优)', highlight: true },
+                { name: 'RSI(14) 34/78 ETF整手', return: statistics.strategy_34_78?.total_return || statistics.strategy.total_return, annual: statistics.strategy_34_78?.annual_return || statistics.strategy.annual_return, note: 'RSI<34买入, RSI>78卖出 (实际最优)' },
+                { name: 'RSI(14) 66/81', return: statistics.strategy_66_81?.total_return, annual: statistics.strategy_66_81?.annual_return, note: 'RSI<66买入, RSI>81卖出' },
+                { name: '红利低波ETF 买入持有', return: statistics.buyhold.total_return, annual: statistics.buyhold.annual_return, note: '累积型ETF基准' },
+                { name: '沪深300ETF (510300)', return: statistics.hs300_return, annual: statistics.hs300_annual, note: 'A股大盘基准' },
+                { name: '黄金ETF (518880)', return: statistics.gold_return, annual: statistics.gold_annual, note: '避险资产' },
+                { name: '纳指ETF (159941)', return: statistics.nasdaq_return, annual: statistics.nasdaq_annual, note: '美股科技' },
+                { name: '标普500ETF (513500)', return: statistics.sp500_return, annual: statistics.sp500_annual, note: '美股大盘' }
             ];
 
             tbody.innerHTML = rows.map(row => `
                 <tr class="${row.highlight ? 'highlight' : ''}">
                     <td><strong>${row.name}</strong></td>
-                    <td class="${row.return >= 0 ? 'return-positive' : 'return-negative'}">
-                        ${row.return !== null ? (row.return >= 0 ? '+' : '') + row.return + '%' : '--'}
-                    </td>
-                    <td>${row.annual !== null ? row.annual + '%' : '--'}</td>
-                    <td style="color: var(--text-secondary); font-size: 0.85rem;">${row.note}</td>
+                    <td class="${row.return >= 0 ? 'positive' : 'negative'}">${row.return !== null && row.return !== undefined ? (row.return >= 0 ? '+' : '') + row.return + '%' : '--'}</td>
+                    <td>${row.annual !== null && row.annual !== undefined ? row.annual + '%' : '--'}</td>
+                    <td class="note-text">${row.note}</td>
                 </tr>
             `).join('');
         }
 
-        function renderChart(daily_values) {
+        function renderChart(daily_values, trades) {
             const ctx = document.getElementById('returnChart').getContext('2d');
             
-            // Sample data for performance (target ~300 points for smooth display)
-            const sampleRate = Math.max(1, Math.floor(daily_values.strategy.length / 300));
-            
-            // Helper function to sample and align data
-            function sampleData(arr, rate) {
-                if (!arr || arr.length === 0) return [];
-                return arr
-                    .filter((_, i) => i % rate === 0 || i === arr.length - 1)
-                    .map(d => ({ x: d.date, y: d.return }));
+            function getFilteredValues(arr) {
+                if (!arr || arr.length === 0) return { labels: [], values: [] };
+                const filtered = filterDataByRange(arr, currentTimeRange);
+                return { labels: filtered.map(d => d.date), values: filtered.map(d => d.return) };
             }
             
-            const strategyData = sampleData(daily_values.strategy, sampleRate);
-            const buyholdData = sampleData(daily_values.buyhold, sampleRate);
-            const buyholdNoDivData = sampleData(daily_values.buyhold_no_div, sampleRate);
-            const hs300Data = sampleData(daily_values.hs300, sampleRate);
-            const goldData = sampleData(daily_values.gold, sampleRate);
-            const nasdaqData = sampleData(daily_values.nasdaq, sampleRate);
+            const strategyIdeal = getFilteredValues(daily_values.strategy_ideal);
+            const strategy = getFilteredValues(daily_values.strategy);
+            const buyhold = getFilteredValues(daily_values.buyhold);
+            const hs300 = getFilteredValues(daily_values.hs300);
+            const gold = getFilteredValues(daily_values.gold);
+            const nasdaq = getFilteredValues(daily_values.nasdaq);
+            const sp500 = getFilteredValues(daily_values.sp500);
 
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
+            if (chartInstance) chartInstance.destroy();
 
-            // Check dark mode
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-            const textColor = isDark ? '#a09888' : '#7a7060';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const textColor = isDark ? '#6b6560' : '#9a948c';
 
-            // Build datasets
             const datasets = [
-                {
-                    label: 'RSI策略',
-                    data: strategyData,
-                    borderColor: '#a08050',
-                    backgroundColor: 'rgba(160,128,80,0.1)',
-                    fill: true,
-                    tension: 0.2,
-                    pointRadius: 0,
-                    borderWidth: 2.5
-                },
-                {
-                    label: '红利低波(全收益)',
-                    data: buyholdData,
-                    borderColor: '#5a8a6a',
-                    backgroundColor: 'transparent',
-                    tension: 0.2,
-                    pointRadius: 0,
-                    borderWidth: 2,
-                    borderDash: [6, 3]
-                },
-                {
-                    label: '红利低波(价格)',
-                    data: buyholdNoDivData,
-                    borderColor: '#8a8a8a',
-                    backgroundColor: 'transparent',
-                    tension: 0.2,
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    borderDash: [3, 3]
-                }
+                { label: 'RSI(15) 联结基金', data: strategyIdeal.values, borderColor: isDark ? '#e4b82d' : '#c9a227', backgroundColor: isDark ? 'rgba(228,184,45,0.1)' : 'rgba(201,162,39,0.1)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2.5 },
+                { label: 'RSI(14) ETF整手', data: strategy.values, borderColor: isDark ? '#4ead7a' : '#2d8659', tension: 0.4, pointRadius: 0, borderWidth: 1.8 },
+                { label: '买入持有', data: buyhold.values, borderColor: isDark ? '#8080a0' : '#6060a0', tension: 0.4, pointRadius: 0, borderWidth: 1.5 }
             ];
 
-            // Add benchmark datasets if data exists
-            if (hs300Data.length > 0) {
-                datasets.push({
-                    label: '沪深300ETF',
-                    data: hs300Data,
-                    borderColor: '#c05050',
-                    backgroundColor: 'transparent',
-                    tension: 0.2,
-                    pointRadius: 0,
-                    borderWidth: 1.5
-                });
-            }
-            
-            if (goldData.length > 0) {
-                datasets.push({
-                    label: '黄金ETF',
-                    data: goldData,
-                    borderColor: '#d4a730',
-                    backgroundColor: 'transparent',
-                    tension: 0.2,
-                    pointRadius: 0,
-                    borderWidth: 1.5
-                });
-            }
-            
-            if (nasdaqData.length > 0) {
-                datasets.push({
-                    label: '纳指ETF',
-                    data: nasdaqData,
-                    borderColor: '#5080c0',
-                    backgroundColor: 'transparent',
-                    tension: 0.2,
-                    pointRadius: 0,
-                    borderWidth: 1.5
-                });
-            }
+            if (hs300.values.length > 0) datasets.push({ label: '沪深300', data: hs300.values, borderColor: isDark ? '#c45c5c' : '#a04040', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
+            if (gold.values.length > 0) datasets.push({ label: '黄金', data: gold.values, borderColor: isDark ? '#d4a020' : '#b08010', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
+            if (nasdaq.values.length > 0) datasets.push({ label: '纳指', data: nasdaq.values, borderColor: isDark ? '#5090d0' : '#3070b0', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
+            if (sp500.values.length > 0) datasets.push({ label: '标普500', data: sp500.values, borderColor: isDark ? '#a070a0' : '#806080', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { datasets },
+                data: { labels: strategyIdeal.labels, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
+                    interaction: { intersect: false, mode: 'index' },
                     plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: textColor,
-                                usePointStyle: true,
-                                padding: 16,
-                                font: { size: 11 }
-                            }
-                        },
+                        legend: { position: 'top', labels: { color: textColor, usePointStyle: true, padding: 16, font: { size: 11, weight: '500' } } },
                         tooltip: {
+                            backgroundColor: isDark ? 'rgba(26,26,28,0.95)' : 'rgba(255,255,255,0.95)',
+                            titleColor: isDark ? '#f0ede8' : '#1f1d1a',
+                            bodyColor: isDark ? '#9a948c' : '#6b6560',
+                            borderColor: isDark ? '#2a2928' : '#e8e4df',
+                            borderWidth: 1, padding: 12, displayColors: true,
                             callbacks: {
-                                title: function(items) {
-                                    return items[0]?.raw?.x || '';
-                                },
-                                label: function(context) {
-                                    const value = context.parsed.y;
-                                    const sign = value >= 0 ? '+' : '';
-                                    return `${context.dataset.label}: ${sign}${value.toFixed(2)}%`;
-                                }
+                                title: items => items[0]?.label || '',
+                                label: ctx => { const v = ctx.parsed.y; return v !== null ? `${ctx.dataset.label}: ${v >= 0 ? '+' : ''}${v.toFixed(2)}%` : null; }
                             }
                         }
                     },
                     scales: {
-                        x: {
-                            type: 'category',
-                            grid: {
-                                color: gridColor,
-                                drawTicks: false
-                            },
-                            ticks: {
-                                color: textColor,
-                                maxTicksLimit: 10,
-                                maxRotation: 0,
-                                autoSkip: true,
-                                font: { size: 10 }
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: gridColor,
-                                drawTicks: false
-                            },
-                            ticks: {
-                                color: textColor,
-                                font: { size: 10 },
-                                callback: value => value + '%'
-                            }
-                        }
+                        x: { type: 'category', grid: { color: gridColor, drawTicks: false }, ticks: { color: textColor, maxTicksLimit: 8, maxRotation: 0, autoSkip: true, font: { size: 10 }, padding: 8 } },
+                        y: { grid: { color: gridColor, drawTicks: false }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '%', padding: 8 } }
                     }
                 }
             });
         }
 
-        function renderTrades(trades) {
-            const tbody = document.getElementById('trades-tbody');
+        function renderDrawdownChart(daily_values) {
+            const ctx = document.getElementById('drawdownChart').getContext('2d');
+            const labels = daily_values.strategy.map(d => d.date);
             
-            // 按时间倒序排列（最近的在上面）
-            const sortedTrades = [...trades].reverse();
+            function calcDrawdown(arr) {
+                if (!arr || arr.length === 0) return [];
+                let peak = arr[0].total_value || 100000;
+                return arr.map(d => {
+                    const value = d.total_value || (100000 * (1 + d.return / 100));
+                    if (value > peak) peak = value;
+                    return -((peak - value) / peak) * 100;
+                });
+            }
             
-            tbody.innerHTML = sortedTrades.map(t => {
-                let actionClass = '';
-                if (t.action === '买入') actionClass = 'action-buy';
-                else if (t.action === '卖出') actionClass = 'action-sell';
-                else actionClass = 'action-dividend';
+            if (drawdownChartInstance) drawdownChartInstance.destroy();
 
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const textColor = isDark ? '#6b6560' : '#9a948c';
+
+            drawdownChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: '联结基金回撤', data: calcDrawdown(daily_values.strategy_ideal), borderColor: isDark ? '#e4b82d' : '#c9a227', backgroundColor: isDark ? 'rgba(228,184,45,0.1)' : 'rgba(201,162,39,0.08)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+                        { label: 'ETF整手回撤', data: calcDrawdown(daily_values.strategy), borderColor: isDark ? '#4ead7a' : '#2d8659', tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
+                        { label: '买入持有回撤', data: calcDrawdown(daily_values.buyhold), borderColor: isDark ? '#8080a0' : '#6060a0', tension: 0.4, pointRadius: 0, borderWidth: 1.2 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { position: 'top', labels: { color: textColor, usePointStyle: true, padding: 16, font: { size: 11, weight: '500' } } },
+                        tooltip: { backgroundColor: isDark ? 'rgba(26,26,28,0.95)' : 'rgba(255,255,255,0.95)', titleColor: isDark ? '#f0ede8' : '#1f1d1a', bodyColor: isDark ? '#9a948c' : '#6b6560', borderColor: isDark ? '#2a2928' : '#e8e4df', borderWidth: 1, padding: 12, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%` } }
+                    },
+                    scales: {
+                        x: { type: 'category', grid: { color: gridColor, drawTicks: false }, ticks: { color: textColor, maxTicksLimit: 8, maxRotation: 0, autoSkip: true, font: { size: 10 }, padding: 8 } },
+                        y: { max: 0, grid: { color: gridColor, drawTicks: false }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '%', padding: 8 } }
+                    }
+                }
+            });
+        }
+
+        function renderYearlyChart(daily_values, statistics) {
+            const ctx = document.getElementById('yearlyChart').getContext('2d');
+            
+            function calcYearlyReturns(arr) {
+                if (!arr || arr.length === 0) return {};
+                const yearly = {};
+                arr.forEach(d => {
+                    const year = d.date.substring(0, 4);
+                    if (!yearly[year]) yearly[year] = { start: d, end: d };
+                    yearly[year].end = d;
+                });
+                const result = {};
+                const years = Object.keys(yearly).sort();
+                years.forEach((year, idx) => {
+                    const startValue = idx === 0 ? 100000 : (100000 * (1 + yearly[years[idx-1]].end.return / 100));
+                    const endValue = 100000 * (1 + yearly[year].end.return / 100);
+                    result[year] = ((endValue / startValue) - 1) * 100;
+                });
+                return result;
+            }
+            
+            const strategyYearly = calcYearlyReturns(daily_values.strategy_ideal || daily_values.strategy);
+            const buyholdYearly = calcYearlyReturns(daily_values.buyhold);
+            const years = Object.keys(strategyYearly).sort();
+            
+            if (yearlyChartInstance) yearlyChartInstance.destroy();
+
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const textColor = isDark ? '#6b6560' : '#9a948c';
+
+            yearlyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [
+                        { label: '联结基金', data: years.map(y => strategyYearly[y] || 0), backgroundColor: years.map(y => (strategyYearly[y] || 0) >= 0 ? (isDark ? 'rgba(228,184,45,0.8)' : 'rgba(201,162,39,0.8)') : (isDark ? 'rgba(224,112,112,0.8)' : 'rgba(196,92,92,0.8)')), borderRadius: 4 },
+                        { label: '买入持有', data: years.map(y => buyholdYearly[y] || 0), backgroundColor: years.map(y => (buyholdYearly[y] || 0) >= 0 ? (isDark ? 'rgba(128,128,160,0.6)' : 'rgba(96,96,160,0.6)') : (isDark ? 'rgba(224,112,112,0.6)' : 'rgba(196,92,92,0.6)')), borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { color: textColor, usePointStyle: true, padding: 12, font: { size: 11, weight: '500' } } }, tooltip: { backgroundColor: isDark ? 'rgba(26,26,28,0.95)' : 'rgba(255,255,255,0.95)', titleColor: isDark ? '#f0ede8' : '#1f1d1a', bodyColor: isDark ? '#9a948c' : '#6b6560', borderColor: isDark ? '#2a2928' : '#e8e4df', borderWidth: 1, padding: 12, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}%` } } },
+                    scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 }, padding: 4 } }, y: { grid: { color: gridColor, drawTicks: false }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '%', padding: 8 } } }
+                }
+            });
+        }
+
+        function renderHoldingChart(trades) {
+            const ctx = document.getElementById('holdingChart').getContext('2d');
+            const buyTrades = trades.filter(t => t.action === '买入');
+            const sellTrades = trades.filter(t => t.action === '卖出');
+            
+            const holdingDays = [], holdingLabels = [];
+            for (let i = 0; i < sellTrades.length; i++) {
+                if (i < buyTrades.length) {
+                    const days = Math.round((new Date(sellTrades[i].date) - new Date(buyTrades[i].date)) / (1000 * 60 * 60 * 24));
+                    holdingDays.push(days);
+                    holdingLabels.push(`第${i + 1}次`);
+                }
+            }
+            if (buyTrades.length > sellTrades.length) {
+                const days = Math.round((new Date() - new Date(buyTrades[buyTrades.length - 1].date)) / (1000 * 60 * 60 * 24));
+                holdingDays.push(days);
+                holdingLabels.push(`第${buyTrades.length}次(持仓中)`);
+            }
+            
+            const totalDays = holdingDays.reduce((a, b) => a + b, 0);
+            const avgDays = holdingDays.length > 0 ? Math.round(totalDays / holdingDays.length) : 0;
+            
+            if (holdingChartInstance) holdingChartInstance.destroy();
+
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const textColor = isDark ? '#6b6560' : '#9a948c';
+
+            holdingChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: holdingLabels, datasets: [{ label: '持仓天数', data: holdingDays, backgroundColor: holdingLabels.map(l => l.includes('持仓中') ? (isDark ? 'rgba(228,184,45,0.9)' : 'rgba(201,162,39,0.9)') : (isDark ? 'rgba(201,160,82,0.7)' : 'rgba(154,123,79,0.7)')), borderRadius: 4 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false }, title: { display: true, text: `平均持仓: ${avgDays} 天 | 总持仓: ${totalDays} 天`, color: textColor, font: { size: 11, weight: '500' }, padding: { bottom: 12 } }, tooltip: { backgroundColor: isDark ? 'rgba(26,26,28,0.95)' : 'rgba(255,255,255,0.95)', titleColor: isDark ? '#f0ede8' : '#1f1d1a', bodyColor: isDark ? '#9a948c' : '#6b6560', borderColor: isDark ? '#2a2928' : '#e8e4df', borderWidth: 1, padding: 12, callbacks: { label: ctx => `持仓 ${ctx.parsed.x} 天` } } },
+                    scales: { x: { grid: { color: gridColor, drawTicks: false }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '天', padding: 4 } }, y: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 }, padding: 4 } } }
+                }
+            });
+        }
+
+        function renderTrades(trades) {
+            const timeline = document.getElementById('trade-timeline');
+            const buyAndSell = trades.filter(t => t.action === '买入' || t.action === '卖出');
+            const pairs = [];
+            let currentBuy = null;
+            
+            buyAndSell.forEach(t => {
+                if (t.action === '买入') { currentBuy = t; }
+                else if (t.action === '卖出' && currentBuy) {
+                    const profit = ((t.price - currentBuy.price) / currentBuy.price * 100).toFixed(2);
+                    const holdingDays = Math.round((new Date(t.date) - new Date(currentBuy.date)) / (1000 * 60 * 60 * 24));
+                    pairs.push({ buy: currentBuy, sell: t, profit: parseFloat(profit), holdingDays });
+                    currentBuy = null;
+                }
+            });
+            if (currentBuy) pairs.push({ buy: currentBuy, sell: null, profit: null, holdingDays: null });
+
+            timeline.innerHTML = pairs.reverse().map((pair, index) => {
+                const pairNum = pairs.length - index;
+                const profitClass = pair.profit !== null ? (pair.profit >= 0 ? 'positive' : 'negative') : '';
+                const profitText = pair.profit !== null ? `${pair.profit >= 0 ? '+' : ''}${pair.profit}%` : '持仓中';
+                
                 return `
-                    <tr>
-                        <td>${t.date}</td>
-                        <td class="${actionClass}">${t.action}</td>
-                        <td>¥${t.price.toFixed(3)}</td>
-                        <td>${t.shares.toFixed(0)}</td>
-                        <td>¥${t.amount.toFixed(2)}</td>
-                        <td>${t.rsi ? t.rsi.toFixed(2) : '--'}</td>
-                        <td>${t.total_shares.toFixed(0)}</td>
-                        <td>¥${t.cash.toFixed(2)}</td>
-                    </tr>
+                    <div class="trade-pair">
+                        <div class="trade-pair-header">
+                            <span class="trade-pair-num">第 ${pairNum} 轮交易</span>
+                            <span class="trade-pair-profit ${profitClass}">${profitText}</span>
+                        </div>
+                        ${pair.sell ? `
+                        <div class="trade-item sell">
+                            <div class="trade-item-header">
+                                <span class="trade-action">卖出</span>
+                                <span class="trade-date">${pair.sell.date} · 持仓 ${pair.holdingDays} 天</span>
+                            </div>
+                            <div class="trade-details">
+                                <div class="trade-detail"><div class="trade-detail-label">价格</div><div class="trade-detail-value">¥${pair.sell.price.toFixed(3)}</div></div>
+                                <div class="trade-detail"><div class="trade-detail-label">数量</div><div class="trade-detail-value">${pair.sell.shares.toFixed(0)}</div></div>
+                                <div class="trade-detail"><div class="trade-detail-label">金额</div><div class="trade-detail-value">¥${pair.sell.amount.toFixed(0)}</div></div>
+                                <div class="trade-detail"><div class="trade-detail-label">RSI</div><div class="trade-detail-value">${pair.sell.rsi ? pair.sell.rsi.toFixed(1) : '--'}</div></div>
+                            </div>
+                        </div>
+                        ` : `<div class="trade-item buy" style="border-style: dashed; opacity: 0.7;"><div class="trade-item-header"><span class="trade-action">⏳ 持仓中</span><span class="trade-date">等待卖出信号...</span></div></div>`}
+                        <div class="trade-item buy">
+                            <div class="trade-item-header">
+                                <span class="trade-action">买入</span>
+                                <span class="trade-date">${pair.buy.date}</span>
+                            </div>
+                            <div class="trade-details">
+                                <div class="trade-detail"><div class="trade-detail-label">价格</div><div class="trade-detail-value">¥${pair.buy.price.toFixed(3)}</div></div>
+                                <div class="trade-detail"><div class="trade-detail-label">数量</div><div class="trade-detail-value">${pair.buy.shares.toFixed(0)}</div></div>
+                                <div class="trade-detail"><div class="trade-detail-label">金额</div><div class="trade-detail-value">¥${pair.buy.amount.toFixed(0)}</div></div>
+                                <div class="trade-detail"><div class="trade-detail-label">RSI</div><div class="trade-detail-value">${pair.buy.rsi ? pair.buy.rsi.toFixed(1) : '--'}</div></div>
+                            </div>
+                        </div>
+                    </div>
                 `;
             }).join('');
         }
 
-        // Load data on page load
         loadData();
-
-        // Handle dark mode change
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            loadData();
-        });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => loadData());
     </script>
 </body>
 </html>

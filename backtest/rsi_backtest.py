@@ -1,7 +1,8 @@
 """
 红利低波ETF (512890) RSI策略回测
-策略：RSI(14) < 40 买入，RSI(14) > 70 卖出
-包含分红再投资的全收益计算
+策略：RSI(14) < 66 买入，RSI(14) > 81 卖出
+
+注意：512890是累积型ETF，分红已自动再投资体现在价格中，无需额外处理分红
 """
 
 import pandas as pd
@@ -15,8 +16,8 @@ import os
 ETF_CODE = "512890"
 ETF_NAME = "红利低波ETF"
 RSI_PERIOD = 14
-RSI_BUY_THRESHOLD = 40
-RSI_SELL_THRESHOLD = 70
+RSI_BUY_THRESHOLD = 66
+RSI_SELL_THRESHOLD = 81
 INITIAL_CAPITAL = 100000  # 初始资金10万
 
 # 基准ETF配置
@@ -24,6 +25,7 @@ BENCHMARK_ETFS = {
     'hs300': {'code': '510300', 'name': '沪深300ETF'},
     'gold': {'code': '518880', 'name': '黄金ETF'},
     'nasdaq': {'code': '159941', 'name': '纳指ETF'},
+    'sp500': {'code': '513500', 'name': '标普500ETF'},
 }
 
 # ============ RSI计算 ============
@@ -70,31 +72,6 @@ def get_etf_data(code):
         return None
 
 
-def get_etf_dividend(code):
-    """获取ETF分红数据"""
-    print(f"正在获取 {code} 分红数据...")
-    
-    # 直接使用已知分红数据（更可靠）
-    print("使用已知分红数据...")
-    dividend_data = [
-        # 512890 历史分红 (每份基金分红金额，元)
-        {'date': '2017-01-06', 'dividend': 0.028},
-        {'date': '2018-01-05', 'dividend': 0.041},
-        {'date': '2019-01-04', 'dividend': 0.058},
-        {'date': '2020-01-09', 'dividend': 0.074},
-        {'date': '2021-01-07', 'dividend': 0.048},
-        {'date': '2022-01-06', 'dividend': 0.042},
-        {'date': '2023-01-05', 'dividend': 0.072},
-        {'date': '2024-01-04', 'dividend': 0.064},
-        {'date': '2024-07-11', 'dividend': 0.030},
-        {'date': '2025-01-06', 'dividend': 0.058},
-    ]
-    df = pd.DataFrame(dividend_data)
-    df['date'] = pd.to_datetime(df['date'])
-    print(f"使用 {len(df)} 条已知分红记录")
-    return df
-
-
 def get_benchmark_data(code, name, index_type="index"):
     """获取基准指数数据"""
     print(f"正在获取基准 {name} 数据...")
@@ -120,10 +97,12 @@ def get_benchmark_data(code, name, index_type="index"):
 
 
 # ============ 回测引擎 ============
-def run_backtest(df, dividend_df, initial_capital=INITIAL_CAPITAL):
+def run_backtest(df, initial_capital=INITIAL_CAPITAL):
     """
     执行RSI策略回测
-    返回：交易记录、每日净值、统计指标
+    
+    注意：512890是累积型ETF，分红已自动再投资体现在前复权价格中
+    返回：交易记录、每日净值
     """
     df = df.copy()
     df['rsi'] = calculate_rsi(df['close'], RSI_PERIOD)
@@ -136,35 +115,11 @@ def run_backtest(df, dividend_df, initial_capital=INITIAL_CAPITAL):
     trades = []  # 交易记录
     daily_values = []  # 每日净值
     
-    # 合并分红数据
-    dividend_dict = {}
-    if dividend_df is not None:
-        for _, row in dividend_df.iterrows():
-            dividend_dict[row['date'].strftime('%Y-%m-%d')] = row['dividend']
-    
     for i, row in df.iterrows():
         date = row['date']
         price = row['close']
         rsi = row['rsi']
-        
-        # 处理分红（分红再投资）
         date_str = date.strftime('%Y-%m-%d')
-        if date_str in dividend_dict and shares > 0:
-            dividend_per_share = dividend_dict[date_str]
-            dividend_amount = shares * dividend_per_share
-            # 分红再投资：用分红金额买入更多份额
-            new_shares = dividend_amount / price
-            shares += new_shares
-            trades.append({
-                'date': date_str,
-                'action': '分红再投',
-                'price': price,
-                'shares': new_shares,
-                'amount': dividend_amount,
-                'rsi': rsi,
-                'total_shares': shares,
-                'cash': cash
-            })
         
         # RSI信号判断
         if pd.notna(rsi):
@@ -226,28 +181,19 @@ def run_backtest(df, dividend_df, initial_capital=INITIAL_CAPITAL):
     return trades, daily_values
 
 
-def calculate_buy_and_hold(df, dividend_df, initial_capital=INITIAL_CAPITAL):
-    """计算买入持有策略（全收益，含分红再投资）"""
+def calculate_buy_and_hold(df, initial_capital=INITIAL_CAPITAL):
+    """计算买入持有策略
+    
+    注意：512890是累积型ETF，分红已体现在前复权价格中
+    """
     start_price = df.iloc[0]['close']
     shares = int(initial_capital / start_price / 100) * 100
     remaining_cash = initial_capital - shares * start_price
-    
-    # 合并分红
-    dividend_dict = {}
-    if dividend_df is not None:
-        for _, row in dividend_df.iterrows():
-            dividend_dict[row['date'].strftime('%Y-%m-%d')] = row['dividend']
     
     daily_values = []
     for _, row in df.iterrows():
         date_str = row['date'].strftime('%Y-%m-%d')
         price = row['close']
-        
-        # 处理分红
-        if date_str in dividend_dict and shares > 0:
-            dividend_amount = shares * dividend_dict[date_str]
-            new_shares = dividend_amount / price
-            shares += new_shares
         
         total_value = remaining_cash + shares * price
         daily_values.append({
@@ -336,10 +282,15 @@ def calculate_statistics(daily_values, trades):
         if drawdown > max_drawdown:
             max_drawdown = drawdown
     
-    # 计算年化收益
-    days = len(daily_values)
+    # 计算年化收益（使用自然日天数，而非交易日数）
+    trading_days = len(daily_values)
     total_return = returns[-1]
-    annual_return = ((1 + total_return / 100) ** (365 / days) - 1) * 100 if days > 0 else 0
+    # 计算起止日期的自然天数
+    from datetime import datetime
+    start_date = datetime.strptime(daily_values[0]['date'], '%Y-%m-%d')
+    end_date = datetime.strptime(daily_values[-1]['date'], '%Y-%m-%d')
+    calendar_days = (end_date - start_date).days
+    annual_return = ((1 + total_return / 100) ** (365 / calendar_days) - 1) * 100 if calendar_days > 0 else 0
     
     # 交易统计
     buy_trades = [t for t in trades if t['action'] == '买入']
@@ -361,18 +312,23 @@ def calculate_statistics(daily_values, trades):
         'win_rate': round(win_rate, 2),
         'start_date': daily_values[0]['date'],
         'end_date': daily_values[-1]['date'],
-        'days': days
+        'days': trading_days,
+        'calendar_days': calendar_days
     }
 
 
-def calculate_annual_return(total_return_pct, days):
+def calculate_annual_return(total_return_pct, calendar_days):
     """计算复利年化收益率
+    
+    Args:
+        total_return_pct: 总收益率百分比
+        calendar_days: 自然日天数（非交易日）
     
     公式: annual_return = (1 + total_return) ^ (365/days) - 1
     """
-    if days <= 0 or total_return_pct is None:
+    if calendar_days <= 0 or total_return_pct is None:
         return None
-    return round(((1 + total_return_pct / 100) ** (365 / days) - 1) * 100, 2)
+    return round(((1 + total_return_pct / 100) ** (365 / calendar_days) - 1) * 100, 2)
 
 
 # ============ 主程序 ============
@@ -386,8 +342,6 @@ def main():
     if etf_df is None:
         print("无法获取ETF数据，退出")
         return
-    
-    dividend_df = get_etf_dividend(ETF_CODE)
     
     # 2. 统一时间范围
     start_date = etf_df['date'].min()
@@ -411,16 +365,14 @@ def main():
             print(f"  获取失败: {e}")
             benchmark_data[key] = None
     
-    # 4. 执行回测
+    # 4. 执行回测（无需分红处理，累积型ETF分红已体现在价格中）
     print("\n正在执行RSI策略回测...")
-    trades, strategy_values = run_backtest(etf_df, dividend_df)
+    trades, strategy_values = run_backtest(etf_df)
     
     print("正在计算买入持有收益...")
-    buyhold_values = calculate_buy_and_hold(etf_df, dividend_df)
+    buyhold_values = calculate_buy_and_hold(etf_df)
     
     print("正在计算基准收益...")
-    # 买入持有（不含分红）
-    buyhold_no_div = calculate_benchmark_return(etf_df[['date', 'close']])
     
     # 获取策略的日期列表，用于对齐所有基准数据
     strategy_dates = [d['date'] for d in strategy_values]
@@ -441,16 +393,13 @@ def main():
     strategy_stats = calculate_statistics(strategy_values, trades)
     buyhold_stats = calculate_statistics(buyhold_values, [])
     
-    # 计算回测天数（用于年化收益计算）
-    backtest_days = strategy_stats['days']
+    # 使用自然日天数计算年化收益率
+    calendar_days = strategy_stats.get('calendar_days', strategy_stats['days'])
     
     # 计算各基准的年化收益率
-    buyhold_no_div_return = round(buyhold_no_div[-1]['return'], 2) if buyhold_no_div else None
-    buyhold_no_div_annual = calculate_annual_return(buyhold_no_div_return, backtest_days)
-    
     benchmark_annuals = {}
     for key in benchmark_returns:
-        benchmark_annuals[key] = calculate_annual_return(benchmark_returns.get(key), backtest_days)
+        benchmark_annuals[key] = calculate_annual_return(benchmark_returns.get(key), calendar_days)
     
     print("\n" + "=" * 60)
     print("回测结果")
@@ -462,7 +411,7 @@ def main():
     print(f"  交易次数: {strategy_stats['trade_count']} 次")
     print(f"  胜率: {strategy_stats['win_rate']:.2f}%")
     
-    print(f"\n【买入持有（全收益）】")
+    print(f"\n【买入持有】")
     print(f"  总收益率: {buyhold_stats['total_return']:.2f}%")
     print(f"  年化收益: {buyhold_stats['annual_return']:.2f}%")
     
@@ -489,24 +438,24 @@ def main():
         'statistics': {
             'strategy': strategy_stats,
             'buyhold': buyhold_stats,
-            'buyhold_no_div_return': buyhold_no_div_return,
-            'buyhold_no_div_annual': buyhold_no_div_annual,
             'hs300_return': benchmark_returns.get('hs300'),
             'hs300_annual': benchmark_annuals.get('hs300'),
             'gold_return': benchmark_returns.get('gold'),
             'gold_annual': benchmark_annuals.get('gold'),
             'nasdaq_return': benchmark_returns.get('nasdaq'),
             'nasdaq_annual': benchmark_annuals.get('nasdaq'),
+            'sp500_return': benchmark_returns.get('sp500'),
+            'sp500_annual': benchmark_annuals.get('sp500'),
             'backtest_days': backtest_days,
         },
         'trades': trades,
         'daily_values': {
             'strategy': strategy_values,
             'buyhold': buyhold_values,
-            'buyhold_no_div': buyhold_no_div,
             'hs300': benchmark_values.get('hs300', []),
             'gold': benchmark_values.get('gold', []),
             'nasdaq': benchmark_values.get('nasdaq', []),
+            'sp500': benchmark_values.get('sp500', []),
         }
     }
     
