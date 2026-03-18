@@ -3,13 +3,14 @@
   "etf_name": "红利低波ETF",
   "rsi": 59.13,
   "rsi_period": 15,
+  "market_date": "2026-03-18",
   "price": 1.2,
   "buy_threshold": 32,
   "sell_threshold": 77,
   "signal": "持有",
   "signal_color": "#3b82f6",
   "strategy": "RSI(15) EMA 32/77",
-  "backtest_return": "268.02%",
-  "backtest_annual": "20.90%",
-  "timestamp": "2026-03-18 13:38:05 (北京时间)"
+  "backtest_return": "268.32%",
+  "backtest_annual": "19.97%",
+  "timestamp": "2026-03-18 14:04:48 (北京时间)"
 }
