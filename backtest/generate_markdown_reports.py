@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 RESULT_PATH = ROOT / "backtest_result.json"
 PARAMS_PATH = ROOT / "best_combined_params.json"
-OPT_REPORT_PATH = ROOT / "最新参数优化报告_2026-01-08.md"
+OPT_REPORT_PATH = ROOT / "最新参数优化报告.md"
 COMPARE_REPORT_PATH = ROOT / "策略对比报告.md"
 
 
@@ -29,6 +29,8 @@ def fmt_num(value, digits=2):
 def build_optimization_report(result, params, today):
     meta = result.get("meta", {})
     stats = result.get("statistics", {})
+    optimization_meta = meta.get("dynamic_optimization", {})
+    baseline_params = optimization_meta.get("baseline_params", {})
 
     dynamic = stats.get("strategy_dynamic", {})
     baseline = stats.get("strategy_ideal") or stats.get("strategy") or {}
@@ -64,9 +66,9 @@ def build_optimization_report(result, params, today):
         "",
         "### 参数",
         "```text",
-        f"RSI 周期: {baseline.get('rsi_period', 15)}（日）",
-        "买入条件: RSI < 32",
-        "卖出条件: RSI > 77",
+        f"RSI 周期: {baseline_params.get('rsi_period', 15)}（日）",
+        f"买入条件: RSI < {baseline_params.get('rsi_buy_base', 32)}",
+        f"卖出条件: RSI > {baseline_params.get('rsi_sell_base', 77)}",
         "平滑方式: EMA",
         "```",
         "",
@@ -234,7 +236,10 @@ def build_comparison_report(result, today):
 
 def main():
     result = load_json(RESULT_PATH)
-    params = load_json(PARAMS_PATH)
+    if PARAMS_PATH.exists():
+        params = load_json(PARAMS_PATH)
+    else:
+        params = result.get("meta", {}).get("dynamic_params", {})
     today = datetime.now().strftime("%Y-%m-%d")
 
     OPT_REPORT_PATH.write_text(build_optimization_report(result, params, today), encoding="utf-8")

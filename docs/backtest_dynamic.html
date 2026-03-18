@@ -845,8 +845,6 @@
             const rows = [
                 { name: 'RSI+波动率 动态调优', r: statistics.strategy_dynamic?.total_return, a: statistics.strategy_dynamic?.annual_return, note: '波动率档位自适应 RSI 阈值', highlight: true },
                 { name: 'RSI(15) 联结基金', r: statistics.strategy_ideal?.total_return || statistics.strategy?.total_return, a: statistics.strategy_ideal?.annual_return || statistics.strategy?.annual_return, note: 'EMA 平滑 + 小数份额' },
-                { name: '波动率 HV16/7', r: statistics.strategy_volatility?.total_return, a: statistics.strategy_volatility?.annual_return, note: '恐慌买入 / 过热卖出' },
-                { name: '反向均线 MA8/72', r: statistics.strategy_ma_reverse?.total_return, a: statistics.strategy_ma_reverse?.annual_return, note: '死叉买入 · 金叉卖出' },
                 { name: '买入持有', r: statistics.buyhold.total_return, a: statistics.buyhold.annual_return, note: '累积型ETF基准' },
                 { name: '沪深300ETF', r: statistics.hs300_return, a: statistics.hs300_annual, note: '大盘参考' }
             ].filter(r => r.r !== undefined && r.r !== null);

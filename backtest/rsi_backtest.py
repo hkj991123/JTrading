@@ -8,7 +8,7 @@
 import pandas as pd
 import numpy as np
 import akshare as ak
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
 import os
 
@@ -27,6 +27,17 @@ BENCHMARK_ETFS = {
     'nasdaq': {'code': '159941', 'name': '纳指ETF'},
     'sp500': {'code': '513500', 'name': '标普500ETF'},
 }
+
+
+def load_previous_result(path):
+    """Load previous backtest JSON for benchmark fallback when API fetch fails."""
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 # ============ RSI计算 ============
 def calculate_rsi(prices, period=15):
@@ -346,6 +357,12 @@ def main():
     print(f"\n回测区间: {start_date.strftime('%Y-%m-%d')} 至 {end_date.strftime('%Y-%m-%d')}")
     
     # 3. 获取基准ETF数据
+    output_dir = os.path.dirname(os.path.abspath(__file__))
+    output_file = os.path.join(output_dir, "backtest_result.json")
+    previous_result = load_previous_result(output_file)
+    previous_stats = previous_result.get('statistics', {}) if previous_result else {}
+    previous_daily = previous_result.get('daily_values', {}) if previous_result else {}
+
     benchmark_data = {}
     for key, info in BENCHMARK_ETFS.items():
         print(f"正在获取 {info['name']} ({info['code']}) 数据...")
@@ -383,8 +400,14 @@ def main():
             benchmark_values[key] = values
             benchmark_returns[key] = round(values[-1]['return'], 2) if values else None
         else:
-            benchmark_values[key] = []
-            benchmark_returns[key] = None
+            fallback_values = previous_daily.get(key, [])
+            fallback_return = previous_stats.get(f'{key}_return')
+            benchmark_values[key] = fallback_values if fallback_values else []
+            benchmark_returns[key] = fallback_return
+            if fallback_return is not None:
+                print(f"  {BENCHMARK_ETFS[key]['name']} 使用上次结果兜底: {fallback_return:.2f}%")
+            else:
+                print(f"  {BENCHMARK_ETFS[key]['name']} 无可用兜底数据")
     
     # 5. 计算统计指标
     strategy_stats = calculate_statistics(strategy_values, trades)
@@ -396,7 +419,10 @@ def main():
     # 计算各基准的年化收益率
     benchmark_annuals = {}
     for key in benchmark_returns:
-        benchmark_annuals[key] = calculate_annual_return(benchmark_returns.get(key), calendar_days)
+        annual = calculate_annual_return(benchmark_returns.get(key), calendar_days)
+        if annual is None:
+            annual = previous_stats.get(f'{key}_annual')
+        benchmark_annuals[key] = annual
 
     # 记录回测天数供导出使用
     backtest_days = strategy_stats.get('days', len(strategy_values))
@@ -421,9 +447,6 @@ def main():
             print(f"  总收益率: {benchmark_returns[key]:.2f}%")
     
     # 6. 导出数据为JSON
-    output_dir = os.path.dirname(os.path.abspath(__file__))
-    output_file = os.path.join(output_dir, "backtest_result.json")
-    
     # 准备导出数据
     export_data = {
         'meta': {

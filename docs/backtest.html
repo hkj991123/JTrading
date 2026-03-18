@@ -1204,8 +1204,6 @@
                 { name: 'RSI+波动率 动态调优', return: statistics.strategy_dynamic?.total_return, annual: statistics.strategy_dynamic?.annual_return, note: '基于波动率动态调整RSI阈值 (联结基金/无整手限制)', highlight: true },
                 { name: 'RSI(15) 32/77 联结基金', return: statistics.strategy_ideal?.total_return, annual: statistics.strategy_ideal?.annual_return, note: 'EMA平滑+小数份额 (理论最优)' },
                 { name: 'RSI(14) 34/78 ETF整手', return: statistics.strategy_34_78?.total_return || statistics.strategy.total_return, annual: statistics.strategy_34_78?.annual_return || statistics.strategy.annual_return, note: 'RSI<34买入, RSI>78卖出 (实际最优)' },
-                { name: '波动率 HV16/7', return: statistics.strategy_volatility?.total_return, annual: statistics.strategy_volatility?.annual_return, note: 'HV>16%买入(恐慌), HV<7%卖出(过热)' },
-                { name: '反向均线 MA8/72', return: statistics.strategy_ma_reverse?.total_return, annual: statistics.strategy_ma_reverse?.annual_return, note: '死叉买入(回调低吸), 金叉卖出(突破套利)' },
                 { name: '红利低波ETF 买入持有', return: statistics.buyhold.total_return, annual: statistics.buyhold.annual_return, note: '累积型ETF基准' },
                 { name: '沪深300ETF (510300)', return: statistics.hs300_return, annual: statistics.hs300_annual, note: 'A股大盘基准' },
                 { name: '黄金ETF (518880)', return: statistics.gold_return, annual: statistics.gold_annual, note: '避险资产' },
@@ -1242,8 +1240,6 @@
             const strategyIdeal = getFilteredValues(daily_values.strategy_ideal);
             const strategyDynamic = getFilteredValues(daily_values.strategy_dynamic);
             const strategy = getFilteredValues(daily_values.strategy);
-            const strategyVolatility = getFilteredValues(daily_values.strategy_volatility);
-            const strategyMAReverse = getFilteredValues(daily_values.strategy_ma_reverse);
             const buyhold = getFilteredValues(daily_values.buyhold);
             const hs300 = getFilteredValues(daily_values.hs300);
             const gold = getFilteredValues(daily_values.gold);
@@ -1267,8 +1263,6 @@
                 { label: 'RSI+波动率 动态调优', data: strategyDynamic.values, borderColor: '#a08050', backgroundColor: 'rgba(160, 128, 80, 0.1)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2.5 },
                 { label: 'RSI(15) 联结基金', data: strategyIdeal.values, borderColor: '#c9a962', tension: 0.4, pointRadius: 0, borderWidth: 2 },
                 { label: 'RSI(14) ETF整手', data: strategy.values, borderColor: '#5a8a6a', tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
-                { label: '波动率 HV16/7', data: strategyVolatility.values, borderColor: '#8a8070', tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
-                { label: '反向均线 MA8/72', data: strategyMAReverse.values, borderColor: '#7a7060', tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
                 { label: '买入持有', data: buyhold.values, borderColor: '#a8a29e', tension: 0.4, pointRadius: 0, borderWidth: 1.2 }
             ];
 
