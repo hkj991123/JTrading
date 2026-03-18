@@ -96,6 +96,26 @@
             margin-bottom: 40px;
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .data-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
         .header-left {
             display: flex;
             align-items: center;
@@ -147,6 +167,19 @@
             border-color: var(--primary);
             color: var(--primary);
             background: var(--bg-elevated);
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
 
         /* Stats Cards */
@@ -762,7 +795,10 @@
                     <div class="subtitle" id="subtitle">红利低波ETF (512890) | 加载中...</div>
                 </div>
             </div>
-            <a href="index.html" class="back-btn">← 返回监控</a>
+            <div class="header-actions">
+                <span class="data-chip" id="data-chip">周度回测快照 · 更新中</span>
+                <a href="index.html" class="back-btn">← 返回监控</a>
+            </div>
         </header>
 
         <!-- Stats -->
@@ -797,7 +833,7 @@
         <!-- Strategy Rules -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">📋 策略规则 · ETF联结基金 RSI(15) 32/77（2026-01-08最优）</div>
+                <div class="card-title" id="strategy-title">📋 策略规则 · ETF联结基金 RSI(15) 32/77</div>
             </div>
             <div class="card-body">
                 <div class="strategy-grid">
@@ -813,8 +849,8 @@
                 <div class="strategy-meta">
                     <span>💰 初始资金：100,000 元</span>
                     <span>📊 交易方式：ETF联结基金（允许小数份额）</span>
-                    <span>🔬 最优参数：经 28,050 组参数优化得出</span>
-                    <span>📅 优化日期：2026-01-08（数据到最新）</span>
+                    <span id="meta-optimization">🔬 参数优化：回测结果加载中</span>
+                    <span id="meta-updated">📅 数据更新时间：--</span>
                 </div>
             </div>
         </div>
@@ -1134,8 +1170,17 @@
         function renderPage(data) {
             const { meta, statistics, trades, daily_values } = data;
             const stats = statistics.strategy_ideal || statistics.strategy;
+            const generatedAt = meta.generated_at || '--';
+            const baseStrategyLabel = meta.strategy || 'RSI(15) 策略';
+            const optimizationIterations = meta.dynamic_optimization?.iterations;
 
-            document.getElementById('subtitle').textContent = `${meta.etf_name} (${meta.etf_code}) · ${meta.start_date} 至 ${meta.end_date}`;
+            document.getElementById('subtitle').textContent = `${meta.etf_name} (${meta.etf_code}) · ${meta.start_date} 至 ${meta.end_date} · 更新 ${generatedAt}`;
+            document.getElementById('data-chip').textContent = `周度回测快照 · ${generatedAt}`;
+            document.getElementById('strategy-title').textContent = `📋 策略规则 · ${baseStrategyLabel}`;
+            document.getElementById('meta-optimization').textContent = optimizationIterations
+                ? `🔬 参数优化：本轮搜索 ${optimizationIterations.toLocaleString('zh-CN')} 组`
+                : '🔬 参数优化：回测结果驱动（自动更新）';
+            document.getElementById('meta-updated').textContent = `📅 数据更新时间：${generatedAt}`;
 
             document.getElementById('stat-return').textContent = `+${stats.total_return}%`;
             document.getElementById('stat-annual').textContent = `年化 ${stats.annual_return}%`;

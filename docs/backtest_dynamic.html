@@ -49,6 +49,26 @@
             margin-bottom: 32px;
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .data-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-2);
+            background: var(--card);
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
         .brand {
             display: flex;
             align-items: center;
@@ -93,6 +113,19 @@
         }
 
         .back-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
 
         /* Stats */
         .stats-grid {
@@ -216,7 +249,10 @@
                     <div class="subtitle" id="subtitle">加载中...</div>
                 </div>
             </div>
-            <a class="back-btn" href="index.html">← 返回监控</a>
+            <div class="header-actions">
+                <span class="data-chip" id="data-chip">周度回测快照 · 更新中</span>
+                <a class="back-btn" href="index.html">← 返回监控</a>
+            </div>
         </header>
 
         <div class="stats-grid">
@@ -256,15 +292,15 @@
                 <div class="strategy-grid">
                     <div class="rule">
                         <h4>🎯 动态买入阈值</h4>
-                        <p>基准 34，波动率高时降低（恐慌抄底）</p>
+                        <p>参数加载中...</p>
                     </div>
                     <div class="rule">
                         <h4>🎯 动态卖出阈值</h4>
-                        <p>基准 71，波动率低时提高（延长持仓）</p>
+                        <p>参数加载中...</p>
                     </div>
                     <div class="rule">
                         <h4>📊 波动率窗口</h4>
-                        <p>动态读取最优参数后自动更新（含窗口与系数）</p>
+                        <p>参数加载中...</p>
                     </div>
                 </div>
             </div>
@@ -448,8 +484,10 @@
         function render(data) {
             const { meta, statistics, trades, daily_values } = data;
             const stats = statistics.strategy_dynamic || statistics.strategy || statistics.strategy_ideal;
+            const generatedAt = meta.generated_at || '--';
 
-            document.getElementById('subtitle').textContent = `${meta.etf_name} (${meta.etf_code}) · ${meta.start_date} 至 ${meta.end_date}`;
+            document.getElementById('subtitle').textContent = `${meta.etf_name} (${meta.etf_code}) · ${meta.start_date} 至 ${meta.end_date} · 更新 ${generatedAt}`;
+            document.getElementById('data-chip').textContent = `周度回测快照 · ${generatedAt}`;
             document.getElementById('stat-return').textContent = `+${stats.total_return}%`;
             document.getElementById('stat-annual').textContent = `年化 ${stats.annual_return}%`;
             document.getElementById('stat-drawdown').textContent = `-${stats.max_drawdown}%`;

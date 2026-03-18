@@ -106,34 +106,6 @@
             }
         }
 
-        .insight-strip {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .insight-item {
-            background: linear-gradient(180deg, rgba(201,169,98,0.1) 0%, rgba(25,24,27,0.95) 100%);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 14px;
-        }
-
-        .insight-label {
-            font-size: 0.74rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-secondary);
-        }
-
-        .insight-value {
-            margin-top: 6px;
-            font-size: 1.08rem;
-            font-weight: 700;
-            color: var(--text-color);
-        }
-
         /* Cards */
         .card {
             background: var(--card-bg);
@@ -441,11 +413,17 @@
             font-size: 0.78rem;
         }
 
-        @media (max-width: 900px) {
-            .insight-strip {
-                grid-template-columns: 1fr;
-            }
+        .dual-subtitle.secondary {
+            margin-top: 6px;
+        }
 
+        .dual-subtitle.muted {
+            margin-top: 6px;
+            font-size: 0.74rem;
+            opacity: 0.92;
+        }
+
+        @media (max-width: 900px) {
             .rsi-card {
                 min-height: auto;
             }
@@ -609,21 +587,6 @@
             </div>
         </header>
 
-        <div class="insight-strip">
-            <div class="insight-item">
-                <div class="insight-label">经典策略年化</div>
-                <div class="insight-value" id="insight-classic">--</div>
-            </div>
-            <div class="insight-item">
-                <div class="insight-label">动态策略年化</div>
-                <div class="insight-value" id="insight-dynamic">--</div>
-            </div>
-            <div class="insight-item">
-                <div class="insight-label">动态领先幅度</div>
-                <div class="insight-value" id="insight-spread">--</div>
-            </div>
-        </div>
-
         <div class="dashboard-grid">
             <!-- Left Column: Main Monitor -->
             <div class="card rsi-card">
@@ -706,7 +669,8 @@
                             <div class="signal-meta" id="dynamic-meta">阈值: -- / -- · 波动率 --</div>
                         </div>
                     </div>
-                    <div class="dual-subtitle" id="dual-subtitle">策略回测年化: 经典 -- · 动态 --</div>
+                    <div class="dual-subtitle secondary" id="dual-metrics">经典策略年化 -- · 动态策略年化 -- · 动态领先 --</div>
+                    <div class="dual-subtitle muted" id="dynamic-update-time">动态阈值/波动率更新时间: --</div>
                 </div>
             </div>
         </div>
@@ -758,10 +722,8 @@
             dynamicSignalPill: document.getElementById('dynamic-signal-pill'),
             dynamicSignalText: document.getElementById('dynamic-signal-text'),
             dynamicMeta: document.getElementById('dynamic-meta'),
-            dualSubtitle: document.getElementById('dual-subtitle'),
-            insightClassic: document.getElementById('insight-classic'),
-            insightDynamic: document.getElementById('insight-dynamic'),
-            insightSpread: document.getElementById('insight-spread')
+            dualMetrics: document.getElementById('dual-metrics'),
+            dynamicUpdateTime: document.getElementById('dynamic-update-time')
         };
 
         function toNumber(value) {
@@ -860,6 +822,14 @@
             el.textContent = signal || '未知';
         }
 
+        function normalizeTimestamp(ts) {
+            if (!ts) return '--';
+            return String(ts)
+                .replace(' (GitHub Actions)', '')
+                .replace(' (weekly backtest)', '')
+                .trim();
+        }
+
         function updateUI(data, dynamicData) {
             els.loading.classList.add('hidden');
 
@@ -915,14 +885,12 @@
             els.classicSignalText.textContent = `RSI ${rsi.toFixed(2)} · ${data.signal || '持有'}`;
             els.classicMeta.textContent = `阈值: ${data.buy_threshold ?? 32} / ${data.sell_threshold ?? 77}`;
 
-            els.insightClassic.textContent = classicAnnualText;
-            els.insightDynamic.textContent = dynamicAnnualText;
+            let spreadText = '--';
             if (classicAnnualNum !== null && dynamicAnnualNum !== null) {
                 const spread = dynamicAnnualNum - classicAnnualNum;
-                els.insightSpread.textContent = `${spread >= 0 ? '+' : ''}${spread.toFixed(2)}%`;
-            } else {
-                els.insightSpread.textContent = '--';
+                spreadText = `${spread >= 0 ? '+' : ''}${spread.toFixed(2)}%`;
             }
+            els.dualMetrics.textContent = `经典策略年化 ${classicAnnualText} · 动态策略年化 ${dynamicAnnualText} · 动态领先 ${spreadText}`;
 
             if (dynamicData) {
                 applySignalPill(els.dynamicSignalPill, dynamicData.signal || '持有');
@@ -940,12 +908,16 @@
                     ? Number(dynamicData.volatility).toFixed(2)
                     : '--';
                 els.dynamicMeta.textContent = `阈值: ${buyThr} / ${sellThr} · 波动率 ${vol}%`;
-                els.dualSubtitle.textContent = `策略回测年化: 经典 ${classicAnnualText} · 动态 ${dynamicAnnualText}`;
+                const dynamicTs = normalizeTimestamp(dynamicData.timestamp || data.timestamp);
+                const sourceTag = String(dynamicData.timestamp || '').includes('weekly backtest')
+                    ? '周度回测兜底'
+                    : 'GitHub Actions 小时级更新';
+                els.dynamicUpdateTime.textContent = `动态阈值/波动率更新时间: ${dynamicTs}（${sourceTag}）`;
             } else {
                 applySignalPill(els.dynamicSignalPill, '未知');
                 els.dynamicSignalText.textContent = '动态信号暂不可用';
                 els.dynamicMeta.textContent = '阈值: -- / -- · 波动率 --';
-                els.dualSubtitle.textContent = `策略回测年化: 经典 ${classicAnnualText} · 动态 --`;
+                els.dynamicUpdateTime.textContent = '动态阈值/波动率更新时间: --';
             }
 
             // Update Time
