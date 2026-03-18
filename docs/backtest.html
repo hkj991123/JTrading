@@ -1207,8 +1207,7 @@
                 { name: '红利低波ETF 买入持有', return: statistics.buyhold.total_return, annual: statistics.buyhold.annual_return, note: '累积型ETF基准' },
                 { name: '沪深300ETF (510300)', return: statistics.hs300_return, annual: statistics.hs300_annual, note: 'A股大盘基准' },
                 { name: '黄金ETF (518880)', return: statistics.gold_return, annual: statistics.gold_annual, note: '避险资产' },
-                { name: '纳指ETF (159941)', return: statistics.nasdaq_return, annual: statistics.nasdaq_annual, note: '美股科技' },
-                { name: '标普500ETF (513500)', return: statistics.sp500_return, annual: statistics.sp500_annual, note: '美股大盘' }
+                { name: '纳指ETF (159941)', return: statistics.nasdaq_return, annual: statistics.nasdaq_annual, note: '美股科技' }
             ];
 
             // Sort by Annual Return descending
@@ -1244,7 +1243,6 @@
             const hs300 = getFilteredValues(daily_values.hs300);
             const gold = getFilteredValues(daily_values.gold);
             const nasdaq = getFilteredValues(daily_values.nasdaq);
-            const sp500 = getFilteredValues(daily_values.sp500);
 
             if (chartInstance) chartInstance.destroy();
 
@@ -1269,7 +1267,6 @@
             if (hs300.values.length > 0) datasets.push({ label: '沪深300', data: hs300.values, borderColor: '#a05050', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
             if (gold.values.length > 0) datasets.push({ label: '黄金', data: gold.values, borderColor: '#d4a020', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
             if (nasdaq.values.length > 0) datasets.push({ label: '纳指', data: nasdaq.values, borderColor: '#5090d0', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
-            if (sp500.values.length > 0) datasets.push({ label: '标普500', data: sp500.values, borderColor: isDark ? '#a070a0' : '#806080', tension: 0.4, pointRadius: 0, borderWidth: 1.2 });
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
