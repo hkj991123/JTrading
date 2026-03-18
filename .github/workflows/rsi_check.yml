@@ -62,6 +62,9 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add docs/data.json docs/dynamic_data.json docs/config.js
+        git add docs/data.json docs/config.js
+        if [ -f docs/dynamic_data.json ]; then
+          git add docs/dynamic_data.json
+        fi
         git diff --staged --quiet || git commit -m "Update RSI data [skip ci]"
         git push
