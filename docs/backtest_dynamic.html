@@ -15,8 +15,8 @@
             --success: #5a8a6a;
             --warning: #a05050;
             --muted: #8a8070;
-            --text: #332e26;
-            --text-2: #6f6657;
+            --text: #efe8db;
+            --text-2: #a09888;
             --bg: #0f0e10;
             --card: #19181b;
             --elevated: #201f22;
@@ -255,16 +255,16 @@
             <div class="card-body">
                 <div class="strategy-grid">
                     <div class="rule">
-                        <h4>低波稳态 · 抬高阈值</h4>
-                        <p>市场波动率处于低位时，放宽卖出阈值，保持盈利头寸。</p>
+                        <h4>🎯 动态买入阈值</h4>
+                        <p>基准 34，波动率高时降低（恐慌抄底）</p>
                     </div>
                     <div class="rule">
-                        <h4>高波防守 · 下探买点</h4>
-                        <p>恐慌期下调买入阈值，吸收急跌，待情绪修复再卖出。</p>
+                        <h4>🎯 动态卖出阈值</h4>
+                        <p>基准 71，波动率低时提高（延长持仓）</p>
                     </div>
                     <div class="rule">
-                        <h4>RSI(15) EMA</h4>
-                        <p>使用 EMA 平滑噪声，配合波动率档位动态调整 RSI 触发区间。</p>
+                        <h4>📊 波动率窗口</h4>
+                        <p>动态读取最优参数后自动更新（含窗口与系数）</p>
                     </div>
                 </div>
             </div>
@@ -365,14 +365,60 @@
         let currentRange = 'all';
         let returnChart, drawdownChart, yearlyChart, holdingChart, thresholdChart;
 
-        const dynamicParams = {
+        let dynamicParams = {
             rsiPeriod: 15,
             baseBuy: 34,
             baseSell: 71,
-            volWindow: 47,
-            kVol: -0.43,
+            volWindow: 44,
+            kVol: -0.446,
             volAnchor: 15
         };
+
+        function normalizeDynamicParams(meta) {
+            const params = meta?.dynamic_params || {};
+            return {
+                rsiPeriod: Number(params.rsi_period ?? dynamicParams.rsiPeriod),
+                baseBuy: Number(params.rsi_buy_base ?? dynamicParams.baseBuy),
+                baseSell: Number(params.rsi_sell_base ?? dynamicParams.baseSell),
+                volWindow: Number(params.vol_window ?? dynamicParams.volWindow),
+                kVol: Number(params.k_vol ?? dynamicParams.kVol),
+                volAnchor: Number(params.vol_anchor ?? dynamicParams.volAnchor)
+            };
+        }
+
+        function normalizeSeriesNumber(value) {
+            if (value === null || value === undefined) return null;
+            const parsed = Number(value);
+            return Number.isNaN(parsed) ? null : parsed;
+        }
+
+        function formatSigned(value, digits = 3) {
+            const numeric = Number(value || 0);
+            return `${numeric >= 0 ? '+' : ''}${numeric.toFixed(digits)}`;
+        }
+
+        function updateDynamicStrategyMeta(meta) {
+            dynamicParams = normalizeDynamicParams(meta);
+
+            const rules = Array.from(document.querySelectorAll('.strategy-grid .rule'));
+            if (rules.length < 3) return;
+
+            const generatedAt = meta?.generated_at ? String(meta.generated_at).split(' ')[0] : '';
+            const buyBehavior = dynamicParams.kVol < 0 ? '波动率高时降低阈值（更谨慎抄底）' : '波动率高时提高阈值（更积极抄底）';
+            const sellBehavior = dynamicParams.kVol < 0 ? '波动率低时抬高阈值（延长持仓）' : '波动率低时下调阈值（更快止盈）';
+            const [buyRule, sellRule, volRule] = rules;
+
+            const buyText = buyRule.querySelector('p');
+            const sellText = sellRule.querySelector('p');
+            const volText = volRule.querySelector('p');
+
+            if (buyText) buyText.textContent = `基准 ${dynamicParams.baseBuy}，${buyBehavior}`;
+            if (sellText) sellText.textContent = `基准 ${dynamicParams.baseSell}，${sellBehavior}`;
+            if (volText) {
+                const suffix = generatedAt ? `（${generatedAt} 最优）` : '';
+                volText.textContent = `${dynamicParams.volWindow} 日历史波动率，系数 ${formatSigned(dynamicParams.kVol)}${suffix}`;
+            }
+        }
 
         async function load() {
             try {
@@ -393,7 +439,7 @@
                     document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     currentRange = btn.dataset.range;
-                    renderCharts(globalData.daily_values, globalData.trades);
+                    renderCharts(globalData.daily_values, globalData.trades_dynamic || globalData.trades);
                     renderThresholdChart(globalData.daily_values);
                 });
             });
@@ -413,6 +459,7 @@
             document.getElementById('stat-benchmark').textContent = `买入持有 ${statistics.buyhold.annual_return}% 年化`;
 
             const dynTrades = data.trades_dynamic || trades;
+            updateDynamicStrategyMeta(meta);
 
             renderComparison(statistics);
             renderCharts(daily_values, dynTrades);
@@ -539,6 +586,23 @@
         function computeThresholdSeries(dailyValues) {
             const series = dailyValues.strategy_dynamic || [];
             const dates = series.map(d => d.date);
+            const exportedThresholds = series.some(d =>
+                d.buy_threshold !== undefined ||
+                d.sell_threshold !== undefined ||
+                d.volatility !== undefined ||
+                d.rsi !== undefined
+            );
+
+            if (exportedThresholds) {
+                return {
+                    dates,
+                    rsi: series.map(d => normalizeSeriesNumber(d.rsi)),
+                    vol: series.map(d => normalizeSeriesNumber(d.volatility)),
+                    buyThr: series.map(d => normalizeSeriesNumber(d.buy_threshold)),
+                    sellThr: series.map(d => normalizeSeriesNumber(d.sell_threshold))
+                };
+            }
+
             const closes = series.map(d => d.close);
             const rsi = computeRsiEma(closes, dynamicParams.rsiPeriod);
             const vol = computeVolatility(closes, dynamicParams.volWindow);

@@ -1,6 +1,6 @@
 """
 红利低波ETF (512890) RSI策略回测
-策略：RSI(14) < 66 买入，RSI(14) > 81 卖出
+策略：RSI(15) < 32 买入，RSI(15) > 77 卖出（2026-01-08 最优参数）
 
 注意：512890是累积型ETF，分红已自动再投资体现在价格中，无需额外处理分红
 """
@@ -15,9 +15,9 @@ import os
 # ============ 配置参数 ============
 ETF_CODE = "512890"
 ETF_NAME = "红利低波ETF"
-RSI_PERIOD = 14
-RSI_BUY_THRESHOLD = 66
-RSI_SELL_THRESHOLD = 81
+RSI_PERIOD = 15  # 优化后：15日（原14日）
+RSI_BUY_THRESHOLD = 32  # 优化后：32（原66）
+RSI_SELL_THRESHOLD = 77  # 优化后：77（原81）
 INITIAL_CAPITAL = 100000  # 初始资金10万
 
 # 基准ETF配置
@@ -29,19 +29,16 @@ BENCHMARK_ETFS = {
 }
 
 # ============ RSI计算 ============
-def calculate_rsi(prices, period=14):
-    """计算RSI指标"""
+def calculate_rsi(prices, period=15):
+    """计算RSI指标（使用EMA平滑，更敏感）"""
     delta = prices.diff()
     gain = delta.where(delta > 0, 0)
     loss = (-delta).where(delta < 0, 0)
     
-    avg_gain = gain.rolling(window=period, min_periods=period).mean()
-    avg_loss = loss.rolling(window=period, min_periods=period).mean()
-    
-    # 使用EMA方式计算后续值
-    for i in range(period, len(prices)):
-        avg_gain.iloc[i] = (avg_gain.iloc[i-1] * (period - 1) + gain.iloc[i]) / period
-        avg_loss.iloc[i] = (avg_loss.iloc[i-1] * (period - 1) + loss.iloc[i]) / period
+    # 使用EMA而非SMA（更敏感，与优化脚本一致）
+    alpha = 1 / period  # EMA平滑因子
+    avg_gain = gain.ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=alpha, min_periods=period, adjust=False).mean()
     
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))

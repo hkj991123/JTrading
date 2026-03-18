@@ -9,27 +9,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Advanced Gold Theme (Light) */
-            --primary: #a08050;
-            --primary-hover: #7a6040;
-            --primary-light: rgba(160, 128, 80, 0.15);
-            
-            --success: #5a8a6a;
-            --success-bg: rgba(90, 138, 106, 0.15);
-            
-            --danger: #a05050;
-            --danger-bg: rgba(160, 80, 80, 0.15);
-            
-            --bg: #faf9f7;
-            --bg-card: #ffffff;
-            --bg-elevated: #f0ebe5;
-            
-            --text: #3a352d;
-            --text-secondary: #7a7060;
+            /* Advanced Gold Theme (Dark) */
+            --primary: #c9a962;
+            --primary-hover: #d4b878;
+            --primary-light: rgba(201, 169, 98, 0.15);
+
+            --success: #6a9a7a;
+            --success-bg: rgba(106, 154, 122, 0.15);
+
+            --danger: #c07070;
+            --danger-bg: rgba(192, 112, 112, 0.15);
+
+            --bg: #18171a;
+            --bg-card: #222124;
+            --bg-elevated: #2a292c;
+
+            --text: #e8e4dc;
+            --text-secondary: #a09888;
             --text-muted: #8a8070;
-            
-            --border: #e8e4dc;
-            --border-light: #f5f5f4;
+
+            --border: #3a3835;
+            --border-light: #2a292c;
             
             --shadow-sm: none;
             --shadow: none;
@@ -797,7 +797,7 @@
         <!-- Strategy Rules -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">📋 策略规则 · ETF联结基金 RSI(15) 32/77</div>
+                <div class="card-title">📋 策略规则 · ETF联结基金 RSI(15) 32/77（2026-01-08最优）</div>
             </div>
             <div class="card-body">
                 <div class="strategy-grid">
@@ -813,7 +813,8 @@
                 <div class="strategy-meta">
                     <span>💰 初始资金：100,000 元</span>
                     <span>📊 交易方式：ETF联结基金（允许小数份额）</span>
-                    <span>🔬 最优参数：经 28,050 组参数优化</span>
+                    <span>🔬 最优参数：经 28,050 组参数优化得出</span>
+                    <span>📅 优化日期：2026-01-08（数据到最新）</span>
                 </div>
             </div>
         </div>
@@ -1206,9 +1207,16 @@
 
             if (chartInstance) chartInstance.destroy();
 
-            const isDark = false;
+            const isDark = true;
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
             const textColor = isDark ? '#6b6560' : '#9a948c';
+
+            // 兜底：若联结基金/动态数据缺失，使用已有系列的日期作为横轴，避免空图
+            const baseLabels = strategyIdeal.labels.length
+                ? strategyIdeal.labels
+                : (strategy.labels.length
+                    ? strategy.labels
+                    : (buyhold.labels.length ? buyhold.labels : []));
 
             const datasets = [
                 { label: 'RSI+波动率 动态调优', data: strategyDynamic.values, borderColor: '#a08050', backgroundColor: 'rgba(160, 128, 80, 0.1)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2.5 },
@@ -1226,7 +1234,7 @@
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: strategyIdeal.labels, datasets },
+                data: { labels: baseLabels, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -1273,7 +1281,7 @@
 
             if (rsiChartInstance) rsiChartInstance.destroy();
 
-            const isDark = false;
+            const isDark = true;
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
             const textColor = isDark ? '#6b6560' : '#9a948c';
 
@@ -1337,7 +1345,7 @@
             
             if (drawdownChartInstance) drawdownChartInstance.destroy();
 
-            const isDark = false;
+            const isDark = true;
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
             const textColor = isDark ? '#6b6560' : '#9a948c';
 
@@ -1393,7 +1401,7 @@
             
             if (yearlyChartInstance) yearlyChartInstance.destroy();
 
-            const isDark = false;
+            const isDark = true;
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
             const textColor = isDark ? '#6b6560' : '#9a948c';
 
@@ -1446,7 +1454,7 @@
             
             if (holdingChartInstance) holdingChartInstance.destroy();
 
-            const isDark = false;
+            const isDark = true;
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
             const textColor = isDark ? '#6b6560' : '#9a948c';
 

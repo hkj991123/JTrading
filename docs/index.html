@@ -8,44 +8,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #a08050;
-            --primary-light: #c9a962;
-            --primary-dark: #7a6040;
+            --primary-color: #c9a962;
+            --primary-light: #d6bd82;
+            --primary-dark: #9d814a;
             --success-color: #5a8a6a;
             --warning-color: #a05050;
             --neutral-color: #8a8070;
-            --bg-color: #faf9f7;
-            --card-bg: #ffffff;
-            --text-color: #3a352d;
-            --text-secondary: #7a7060;
-            --shadow-color: rgba(80,60,30,0.08);
-            --border-color: #e8e4dc;
-            --gold-accent: #b09060;
-            --accent-bg: rgba(160,128,80,0.04);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary-color: #c9a962;
-                --primary-light: #d4b878;
-                --primary-dark: #a08050;
-                --success-color: #6a9a7a;
-                --warning-color: #c07070;
-                --neutral-color: #8a8070;
-                --bg-color: #18171a;
-                --card-bg: #222124;
-                --text-color: #e8e4dc;
-                --text-secondary: #a09888;
-                --shadow-color: rgba(0,0,0,0.35);
-                --border-color: #3a3835;
-                --gold-accent: #c9a962;
-                --accent-bg: rgba(200,170,100,0.06);
-            }
+            --bg-color: #0f0e10;
+            --card-bg: #19181b;
+            --text-color: #f3eee3;
+            --text-secondary: #a09888;
+            --shadow-color: rgba(0,0,0,0.15);
+            --border-color: #2f2d31;
+            --gold-accent: #c9a962;
+            --accent-bg: rgba(201,169,98,0.08);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background:
+                radial-gradient(circle at 10% -10%, rgba(201,169,98,0.2) 0%, rgba(201,169,98,0) 36%),
+                radial-gradient(circle at 100% 0%, rgba(90,138,106,0.16) 0%, rgba(90,138,106,0) 34%),
+                var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -57,7 +41,7 @@
 
         .container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1160px;
         }
 
         /* Header */
@@ -112,21 +96,50 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 25px;
+            gap: 22px;
         }
 
-        @media (min-width: 850px) {
+        @media (min-width: 980px) {
             .dashboard-grid {
-                grid-template-columns: 2fr 1fr;
+                grid-template-columns: minmax(0, 1.48fr) minmax(330px, 1fr);
+                align-items: start;
             }
+        }
+
+        .insight-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .insight-item {
+            background: linear-gradient(180deg, rgba(201,169,98,0.1) 0%, rgba(25,24,27,0.95) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .insight-label {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+        }
+
+        .insight-value {
+            margin-top: 6px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--text-color);
         }
 
         /* Cards */
         .card {
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 4px 20px var(--shadow-color);
+            padding: 24px;
+            box-shadow: none;
             border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
@@ -137,8 +150,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 40px;
-            padding-bottom: 30px;
+            padding-top: 34px;
+            padding-bottom: 28px;
+            min-height: 580px;
         }
 
         /* Circular Progress Ring */
@@ -162,13 +176,6 @@
             fill: none;
             stroke: var(--border-color);
             stroke-width: 10;
-        }
-
-        /* Dark mode adjustment for ring track */
-        @media (prefers-color-scheme: dark) {
-            .ring-bg {
-                stroke: var(--border-color);
-            }
         }
 
         .ring-progress {
@@ -267,16 +274,18 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 11px 28px;
+            padding: 11px 4px;
             background: transparent;
             color: var(--primary-color);
             border: 1.5px solid var(--primary-color);
-            border-radius: 8px;
-            font-weight: 500;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
             text-decoration: none;
             transition: all 0.2s ease;
-            width: 80%;
-            max-width: 280px;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
         }
 
         .kline-btn:hover {
@@ -290,6 +299,7 @@
             border: none;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 10px rgba(160,128,80,0.2);
         }
 
         .backtest-btn::before {
@@ -311,19 +321,134 @@
         .backtest-btn:hover {
             background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(160,128,80,0.3);
+            box-shadow: 0 6px 15px rgba(160,128,80,0.3);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            max-width: 340px;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .dynamic-btn {
+            background: linear-gradient(135deg, #3b8d99 0%, #2f707a 100%); /* Adjusted Teal */
+            box-shadow: 0 4px 10px rgba(59, 141, 153, 0.2);
+        }
+        
+        .dynamic-btn:hover {
+             background: linear-gradient(135deg, #5aaeb8 0%, #3b8d99 100%);
+             box-shadow: 0 6px 15px rgba(59, 141, 153, 0.3);
+        }
+
+        .outline-btn {
+            grid-column: span 2;
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .outline-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
         }
 
         /* Side Column */
         .side-column {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 18px;
             height: 100%;
         }
 
         .side-column .card:last-child {
             flex: 1;
+        }
+
+        .signal-board {
+            background: linear-gradient(180deg, rgba(201,169,98,0.08) 0%, rgba(25,24,27,1) 100%);
+        }
+
+        .signal-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .signal-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.01);
+            padding: 12px;
+        }
+
+        .signal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .signal-value {
+            color: var(--text-color);
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .signal-meta {
+            margin-top: 6px;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+        }
+
+        .signal-pill {
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .signal-pill.buy {
+            color: var(--success-color);
+            border-color: rgba(90,138,106,0.45);
+            background: rgba(90,138,106,0.16);
+        }
+
+        .signal-pill.sell {
+            color: var(--warning-color);
+            border-color: rgba(160,80,80,0.45);
+            background: rgba(160,80,80,0.16);
+        }
+
+        .signal-pill.hold {
+            color: var(--neutral-color);
+            border-color: rgba(138,128,112,0.45);
+            background: rgba(138,128,112,0.16);
+        }
+
+        .dual-subtitle {
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        @media (max-width: 900px) {
+            .insight-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .rsi-card {
+                min-height: auto;
+            }
         }
 
         .subscribe-card {
@@ -476,13 +601,28 @@
         <header>
             <div class="header-title">
                 <h1>红利低波ETF (512890)</h1>
-                <div class="subtitle">RSI(15) EMA 32/77 量化策略 · 回测年化 20.90%</div>
+                <div class="subtitle">经典 RSI + 动态调优 双引擎监控</div>
             </div>
             <div class="status-badge">
                 <div class="status-dot"></div>
                 <span id="update-time-badge">更新中...</span>
             </div>
         </header>
+
+        <div class="insight-strip">
+            <div class="insight-item">
+                <div class="insight-label">经典策略年化</div>
+                <div class="insight-value" id="insight-classic">--</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-label">动态策略年化</div>
+                <div class="insight-value" id="insight-dynamic">--</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-label">动态领先幅度</div>
+                <div class="insight-value" id="insight-spread">--</div>
+            </div>
+        </div>
 
         <div class="dashboard-grid">
             <!-- Left Column: Main Monitor -->
@@ -513,12 +653,17 @@
                         <div class="price-value" id="price-value">--</div>
                     </div>
                     
-                    <a href="backtest.html" class="kline-btn backtest-btn">
-                        📊 查看策略回测
-                    </a>
-                    <a href="https://xueqiu.com/S/SH512890" target="_blank" class="kline-btn" style="margin-top: 10px;">
-                        📈 查看实时行情
-                    </a>
+                    <div class="button-group">
+                        <a href="backtest.html" class="kline-btn backtest-btn">
+                            📊 经典回测
+                        </a>
+                        <a href="backtest_dynamic.html" class="kline-btn backtest-btn dynamic-btn">
+                            ⚡ 动态调优
+                        </a>
+                        <a href="https://xueqiu.com/S/SH512890" target="_blank" class="kline-btn outline-btn">
+                            📈 雪球实时行情
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -539,25 +684,29 @@
                     </div>
                 </div>
 
-                <!-- Info Card -->
-                <div class="card">
+                <div class="card signal-board">
                     <div class="card-title">
-                        <span>💡</span> 最优策略说明
+                        <span>⚡</span> 双指标看板
                     </div>
-                    <ul class="info-list">
-                        <li>
-                            <div class="dot" style="background: var(--success-color)"></div>
-                            <div><strong>RSI < 32 (买入信号)</strong><br>回测验证的最优买入点，预期收益最大化。</div>
-                        </li>
-                        <li>
-                            <div class="dot" style="background: var(--warning-color)"></div>
-                            <div><strong>RSI > 77 (卖出信号)</strong><br>回测验证的最优卖出点，锁定收益。</div>
-                        </li>
-                        <li>
-                            <div class="dot" style="background: var(--neutral-color)"></div>
-                            <div><strong>32 - 77 (持有)</strong><br>策略持仓期，耐心等待信号触发。</div>
-                        </li>
-                    </ul>
+                    <div class="signal-grid">
+                        <div class="signal-item">
+                            <div class="signal-head">
+                                <span>经典 RSI(15)</span>
+                                <span class="signal-pill hold" id="classic-signal-pill">等待</span>
+                            </div>
+                            <div class="signal-value" id="classic-signal-text">--</div>
+                            <div class="signal-meta" id="classic-meta">阈值: 32 / 77</div>
+                        </div>
+                        <div class="signal-item">
+                            <div class="signal-head">
+                                <span>动态调优信号</span>
+                                <span class="signal-pill hold" id="dynamic-signal-pill">等待</span>
+                            </div>
+                            <div class="signal-value" id="dynamic-signal-text">--</div>
+                            <div class="signal-meta" id="dynamic-meta">阈值: -- / -- · 波动率 --</div>
+                        </div>
+                    </div>
+                    <div class="dual-subtitle" id="dual-subtitle">策略回测年化: 经典 -- · 动态 --</div>
                 </div>
             </div>
         </div>
@@ -602,11 +751,122 @@
             ring: document.getElementById('rsi-ring'),
             loading: document.getElementById('loading-overlay'),
             form: document.getElementById('subscribe-form'),
-            formStatus: document.getElementById('form-status')
+            formStatus: document.getElementById('form-status'),
+            classicSignalPill: document.getElementById('classic-signal-pill'),
+            classicSignalText: document.getElementById('classic-signal-text'),
+            classicMeta: document.getElementById('classic-meta'),
+            dynamicSignalPill: document.getElementById('dynamic-signal-pill'),
+            dynamicSignalText: document.getElementById('dynamic-signal-text'),
+            dynamicMeta: document.getElementById('dynamic-meta'),
+            dualSubtitle: document.getElementById('dual-subtitle'),
+            insightClassic: document.getElementById('insight-classic'),
+            insightDynamic: document.getElementById('insight-dynamic'),
+            insightSpread: document.getElementById('insight-spread')
         };
 
-        function updateUI(data) {
+        function toNumber(value) {
+            if (value === null || value === undefined || value === '') return null;
+            const cleaned = typeof value === 'string' ? value.replace('%', '').trim() : value;
+            const num = Number(cleaned);
+            return Number.isFinite(num) ? num : null;
+        }
+
+        function formatAnnual(value) {
+            const num = toNumber(value);
+            return num === null ? '--' : `${num.toFixed(2)}%`;
+        }
+
+        function resolveClassicAnnual(backtestData, classicData) {
+            const latest =
+                backtestData?.statistics?.strategy_ideal?.annual_return ??
+                backtestData?.statistics?.strategy?.annual_return ??
+                classicData?.backtest_annual;
+            return formatAnnual(latest);
+        }
+
+        function resolveDynamicAnnual(backtestData, dynamicData) {
+            const latest =
+                dynamicData?.backtest_annual ??
+                backtestData?.statistics?.strategy_dynamic?.annual_return ??
+                backtestData?.statistics?.strategy_ideal?.annual_return;
+            return formatAnnual(latest);
+        }
+
+        function inferSignal(rsi, buyThr, sellThr) {
+            if (rsi === null) return '持有';
+            if (buyThr !== null && rsi < buyThr) return '买入';
+            if (sellThr !== null && rsi > sellThr) return '卖出';
+            return '持有';
+        }
+
+        function buildDynamicFallback(backtestData, classicData) {
+            if (!backtestData) return null;
+
+            const series = backtestData?.daily_values?.strategy_dynamic || [];
+            const latest = [...series].reverse().find(item => item && (item.rsi !== null || item.volatility !== null)) || null;
+            const params = backtestData?.meta?.dynamic_params || {};
+            const rsi = toNumber(latest?.rsi) ?? toNumber(classicData?.rsi);
+            const buyThreshold = toNumber(latest?.buy_threshold) ?? toNumber(params?.rsi_buy_base) ?? 32;
+            const sellThreshold = toNumber(latest?.sell_threshold) ?? toNumber(params?.rsi_sell_base) ?? 77;
+            const volatility = toNumber(latest?.volatility);
+            const annual =
+                backtestData?.statistics?.strategy_dynamic?.annual_return ??
+                backtestData?.statistics?.strategy_ideal?.annual_return ??
+                null;
+
+            return {
+                signal: inferSignal(rsi, buyThreshold, sellThreshold),
+                rsi,
+                buy_threshold: buyThreshold,
+                sell_threshold: sellThreshold,
+                volatility,
+                backtest_annual: formatAnnual(annual),
+                timestamp: backtestData?.meta?.generated_at ? `${backtestData.meta.generated_at} (weekly backtest)` : null
+            };
+        }
+
+        function mergeDynamicData(primary, fallback) {
+            if (!primary && !fallback) return null;
+            const merged = { ...(fallback || {}), ...(primary || {}) };
+            const keys = ['signal', 'rsi', 'buy_threshold', 'sell_threshold', 'volatility', 'backtest_annual'];
+            keys.forEach(key => {
+                const value = merged[key];
+                if (value === undefined || value === null || value === '') {
+                    merged[key] = fallback ? fallback[key] : value;
+                }
+            });
+            return merged;
+        }
+
+        async function fetchJsonIfOk(path) {
+            try {
+                const res = await fetch(path);
+                if (!res.ok) return null;
+                return await res.json();
+            } catch {
+                return null;
+            }
+        }
+
+        function signalClass(signal) {
+            if (signal === '买入') return 'buy';
+            if (signal === '卖出') return 'sell';
+            return 'hold';
+        }
+
+        function applySignalPill(el, signal) {
+            const cls = signalClass(signal);
+            el.className = `signal-pill ${cls}`;
+            el.textContent = signal || '未知';
+        }
+
+        function updateUI(data, dynamicData) {
             els.loading.classList.add('hidden');
+
+            const classicAnnualText = resolveClassicAnnual(window.__backtestCache, data);
+            const dynamicAnnualText = resolveDynamicAnnual(window.__backtestCache, dynamicData);
+            const classicAnnualNum = toNumber(classicAnnualText);
+            const dynamicAnnualNum = toNumber(dynamicAnnualText);
 
             if (!data || data.rsi === null || data.rsi === "找不到") {
                 els.rsiValue.textContent = "N/A";
@@ -651,6 +911,43 @@
                 els.ring.style.stroke = "var(--primary-color)";
             }
 
+            applySignalPill(els.classicSignalPill, data.signal || '持有');
+            els.classicSignalText.textContent = `RSI ${rsi.toFixed(2)} · ${data.signal || '持有'}`;
+            els.classicMeta.textContent = `阈值: ${data.buy_threshold ?? 32} / ${data.sell_threshold ?? 77}`;
+
+            els.insightClassic.textContent = classicAnnualText;
+            els.insightDynamic.textContent = dynamicAnnualText;
+            if (classicAnnualNum !== null && dynamicAnnualNum !== null) {
+                const spread = dynamicAnnualNum - classicAnnualNum;
+                els.insightSpread.textContent = `${spread >= 0 ? '+' : ''}${spread.toFixed(2)}%`;
+            } else {
+                els.insightSpread.textContent = '--';
+            }
+
+            if (dynamicData) {
+                applySignalPill(els.dynamicSignalPill, dynamicData.signal || '持有');
+                const drsi = dynamicData.rsi !== null && dynamicData.rsi !== undefined
+                    ? Number(dynamicData.rsi).toFixed(2)
+                    : '--';
+                els.dynamicSignalText.textContent = `RSI ${drsi} · ${dynamicData.signal || '持有'}`;
+                const buyThr = dynamicData.buy_threshold !== null && dynamicData.buy_threshold !== undefined
+                    ? Number(dynamicData.buy_threshold).toFixed(2)
+                    : '--';
+                const sellThr = dynamicData.sell_threshold !== null && dynamicData.sell_threshold !== undefined
+                    ? Number(dynamicData.sell_threshold).toFixed(2)
+                    : '--';
+                const vol = dynamicData.volatility !== null && dynamicData.volatility !== undefined
+                    ? Number(dynamicData.volatility).toFixed(2)
+                    : '--';
+                els.dynamicMeta.textContent = `阈值: ${buyThr} / ${sellThr} · 波动率 ${vol}%`;
+                els.dualSubtitle.textContent = `策略回测年化: 经典 ${classicAnnualText} · 动态 ${dynamicAnnualText}`;
+            } else {
+                applySignalPill(els.dynamicSignalPill, '未知');
+                els.dynamicSignalText.textContent = '动态信号暂不可用';
+                els.dynamicMeta.textContent = '阈值: -- / -- · 波动率 --';
+                els.dualSubtitle.textContent = `策略回测年化: 经典 ${classicAnnualText} · 动态 --`;
+            }
+
             // Update Time
             let timeStr = data.timestamp || "未知";
             try {
@@ -673,10 +970,19 @@
 
         async function fetchData() {
             try {
-                const response = await fetch('data.json');
-                if (!response.ok) throw new Error('Network error');
-                const data = await response.json();
-                updateUI(data);
+                const [classicData, dynamicDataRaw, backtestData] = await Promise.all([
+                    fetchJsonIfOk('data.json'),
+                    fetchJsonIfOk('dynamic_data.json'),
+                    fetchJsonIfOk('backtest_result.json')
+                ]);
+
+                if (!classicData) throw new Error('经典策略数据加载失败');
+
+                window.__backtestCache = backtestData;
+
+                const dynamicFallback = buildDynamicFallback(backtestData, classicData);
+                const dynamicData = mergeDynamicData(dynamicDataRaw, dynamicFallback);
+                updateUI(classicData, dynamicData);
             } catch (error) {
                 console.error(error);
                 els.rsiStatus.textContent = "加载失败";

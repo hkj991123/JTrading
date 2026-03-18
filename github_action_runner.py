@@ -33,6 +33,92 @@ RSI_PERIOD = 15  # RSI周期（使用EMA平滑）
 RSI_BUY_THRESHOLD = int(os.environ.get("RSI_BUY_THRESHOLD", 32))  # 买入阈值
 RSI_SELL_THRESHOLD = int(os.environ.get("RSI_SELL_THRESHOLD", 77))  # 卖出阈值
 
+BEST_PARAMS_PATH = os.path.join("backtest", "best_combined_params.json")
+BACKTEST_RESULT_PATH = os.path.join("backtest", "backtest_result.json")
+
+
+def load_json_file(file_path):
+    """安全读取 JSON 文件。"""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"读取 {file_path} 失败: {e}")
+        return None
+
+
+def load_backtest_summary():
+    """读取回测统计摘要，避免前端展示过期硬编码收益。"""
+    data = load_json_file(BACKTEST_RESULT_PATH)
+    stats = (data or {}).get("statistics", {})
+    strategy_ideal = stats.get("strategy_ideal") or stats.get("strategy") or {}
+    strategy_dynamic = stats.get("strategy_dynamic") or {}
+    return {
+        "classic_total": strategy_ideal.get("total_return"),
+        "classic_annual": strategy_ideal.get("annual_return"),
+        "dynamic_total": strategy_dynamic.get("total_return"),
+        "dynamic_annual": strategy_dynamic.get("annual_return"),
+    }
+
+
+def load_dynamic_params():
+    """读取动态策略最优参数；若缺失则回退到保守默认值。"""
+    params = load_json_file(BEST_PARAMS_PATH) or {}
+    return {
+        "rsi_period": int(params.get("rsi_period", RSI_PERIOD)),
+        "rsi_buy_base": float(params.get("rsi_buy_base", 34)),
+        "rsi_sell_base": float(params.get("rsi_sell_base", 72)),
+        "vol_window": int(params.get("vol_window", 20)),
+        "k_vol": float(params.get("k_vol", 0.0)),
+        "vol_anchor": float(params.get("vol_anchor", 15.0)),
+    }
+
+
+def calculate_volatility_annualized(close_series, window):
+    """按回测口径计算年化波动率(%)。"""
+    if close_series is None or len(close_series) < window + 1:
+        return None
+
+    log_ret = np.log(close_series / close_series.shift(1))
+    vol = log_ret.rolling(window=window).std() * np.sqrt(252) * 100
+    latest = vol.iloc[-1]
+    if pd.isna(latest):
+        return None
+    return float(latest)
+
+
+def compute_dynamic_signal(rsi_value, close_series, params):
+    """基于 RSI + 波动率参数计算当日动态阈值与信号。"""
+    vol = calculate_volatility_annualized(close_series, params["vol_window"])
+    if vol is None or rsi_value is None:
+        return None
+
+    adjustment = params["k_vol"] * (vol - params["vol_anchor"])
+    buy_threshold = params["rsi_buy_base"] - adjustment
+    sell_threshold = params["rsi_sell_base"] + adjustment
+
+    # 与回测前端保持一致的阈值边界
+    buy_threshold = min(50.0, max(20.0, buy_threshold))
+    sell_threshold = min(90.0, max(60.0, sell_threshold))
+
+    if rsi_value < buy_threshold:
+        signal = "买入"
+        signal_color = "#22c55e"
+    elif rsi_value > sell_threshold:
+        signal = "卖出"
+        signal_color = "#ef4444"
+    else:
+        signal = "持有"
+        signal_color = "#3b82f6"
+
+    return {
+        "volatility": round(vol, 2),
+        "buy_threshold": round(buy_threshold, 2),
+        "sell_threshold": round(sell_threshold, 2),
+        "signal": signal,
+        "signal_color": signal_color,
+    }
+
 def fetch_subscriber_emails():
     """
     从私有 Gist 获取订阅者邮箱列表
@@ -132,7 +218,7 @@ def fetch_rsi_and_price():
     
     if df is None or len(df) < RSI_PERIOD + 5:
         print("无法获取足够的历史数据")
-        return None, None
+        return None, None, None, None
     
     # 计算RSI(15) EMA
     df['rsi'] = calculate_rsi_ema(df['close'], RSI_PERIOD)
@@ -149,9 +235,9 @@ def fetch_rsi_and_price():
         print(f"数据日期: {latest_date}")
     else:
         print("RSI计算失败，数据不足")
-        return None, None
+        return None, None, None, None
     
-    return rsi_value, latest_price
+    return rsi_value, latest_price, latest_date, df
 
 def send_email(to_email, subject, content):
     """
@@ -219,7 +305,7 @@ def send_wechat(title, content):
         print(f"微信通知发送失败: {e}")
 
 def main():
-    rsi, price = fetch_rsi_and_price()
+    rsi, price, latest_date, market_df = fetch_rsi_and_price()
     
     if rsi is None:
         print("未能获取有效 RSI 数据，程序结束。")
@@ -294,25 +380,56 @@ def main():
         signal = "持有"
         signal_color = "#3b82f6"  # 蓝色
     
+    backtest_summary = load_backtest_summary()
+    dynamic_params = load_dynamic_params()
+    dynamic_signal = compute_dynamic_signal(rsi, market_df["close"] if market_df is not None else None, dynamic_params)
+
     data = {
         "etf_code": ETF_CODE,
         "etf_name": ETF_NAME,
         "rsi": round(rsi, 2),
         "rsi_period": RSI_PERIOD,
+        "market_date": latest_date,
         "price": round(price, 4) if price else None,
         "buy_threshold": RSI_BUY_THRESHOLD,
         "sell_threshold": RSI_SELL_THRESHOLD,
         "signal": signal,
         "signal_color": signal_color,
         "strategy": f"RSI({RSI_PERIOD}) EMA {RSI_BUY_THRESHOLD}/{RSI_SELL_THRESHOLD}",
-        "backtest_return": "268.02%",
-        "backtest_annual": "20.90%",
+        "backtest_return": f"{backtest_summary['classic_total']:.2f}%" if backtest_summary["classic_total"] is not None else "--",
+        "backtest_annual": f"{backtest_summary['classic_annual']:.2f}%" if backtest_summary["classic_annual"] is not None else "--",
         "timestamp": beijing_time.strftime("%Y-%m-%d %H:%M:%S") + " (北京时间)"
     }
     
     with open(os.path.join(docs_dir, "data.json"), "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"静态数据已保存至 {docs_dir}/data.json")
+
+    dynamic_data = {
+        "etf_code": ETF_CODE,
+        "etf_name": ETF_NAME,
+        "market_date": latest_date,
+        "price": round(price, 4) if price else None,
+        "rsi": round(rsi, 2),
+        "rsi_period": dynamic_params["rsi_period"],
+        "rsi_buy_base": dynamic_params["rsi_buy_base"],
+        "rsi_sell_base": dynamic_params["rsi_sell_base"],
+        "vol_window": dynamic_params["vol_window"],
+        "k_vol": dynamic_params["k_vol"],
+        "vol_anchor": dynamic_params["vol_anchor"],
+        "volatility": dynamic_signal["volatility"] if dynamic_signal else None,
+        "buy_threshold": dynamic_signal["buy_threshold"] if dynamic_signal else None,
+        "sell_threshold": dynamic_signal["sell_threshold"] if dynamic_signal else None,
+        "signal": dynamic_signal["signal"] if dynamic_signal else "未知",
+        "signal_color": dynamic_signal["signal_color"] if dynamic_signal else "#8a8070",
+        "backtest_return": f"{backtest_summary['dynamic_total']:.2f}%" if backtest_summary["dynamic_total"] is not None else "--",
+        "backtest_annual": f"{backtest_summary['dynamic_annual']:.2f}%" if backtest_summary["dynamic_annual"] is not None else "--",
+        "timestamp": beijing_time.strftime("%Y-%m-%d %H:%M:%S") + " (北京时间)"
+    }
+
+    with open(os.path.join(docs_dir, "dynamic_data.json"), "w", encoding="utf-8") as f:
+        json.dump(dynamic_data, f, ensure_ascii=False, indent=2)
+    print(f"动态信号数据已保存至 {docs_dir}/dynamic_data.json")
 
     # ==========================================
     # 动态注入订阅服务地址 (从环境变量)

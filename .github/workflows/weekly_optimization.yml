@@ -1,0 +1,45 @@
+name: Weekly Parameter Optimization
+
+on:
+  schedule:
+    # 每周六北京时间 10:00 执行（UTC 02:00）
+    - cron: '0 2 * * 6'
+  workflow_dispatch:
+
+jobs:
+  optimize-backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run base backtest
+        run: python backtest/rsi_backtest.py
+
+      - name: Run dynamic optimization
+        run: python backtest/combined_optimization.py
+
+      - name: Generate markdown reports
+        run: python backtest/generate_markdown_reports.py
+
+      - name: Commit updated backtest artifacts
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add backtest/backtest_result.json backtest/best_combined_params.json docs/backtest_result.json backtest/最新参数优化报告_2026-01-08.md backtest/策略对比报告.md
+          git diff --staged --quiet || git commit -m "Weekly optimization and backtest refresh [skip ci]"
+          git push
