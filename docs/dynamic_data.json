@@ -1,21 +1,21 @@
 {
   "etf_code": "512890",
   "etf_name": "红利低波ETF",
-  "market_date": "2026-10-19",
-  "price": 1.236,
-  "rsi": 63.76,
+  "market_date": "2026-10-20",
+  "price": 1.223,
+  "rsi": 57.65,
   "rsi_period": 15,
   "rsi_buy_base": 36.0,
   "rsi_sell_base": 71.0,
   "vol_window": 55,
   "k_vol": -0.47875913345650595,
   "vol_anchor": 15.0,
-  "volatility": 12.88,
-  "buy_threshold": 34.98,
-  "sell_threshold": 72.02,
+  "volatility": 13.1,
+  "buy_threshold": 35.09,
+  "sell_threshold": 71.91,
   "signal": "持有",
   "signal_color": "#3b82f6",
   "backtest_return": "278.92%",
   "backtest_annual": "18.76%",
-  "timestamp": "2026-10-19 18:01:56 (北京时间)"
+  "timestamp": "2026-10-20 17:30:21 (北京时间)"
 }
