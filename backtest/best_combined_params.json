@@ -2,7 +2,7 @@
   "rsi_period": 15,
   "rsi_buy_base": 33,
   "rsi_sell_base": 71,
-  "vol_window": 23,
-  "k_vol": -0.42717202188044123,
+  "vol_window": 28,
+  "k_vol": -0.4533516013553841,
   "vol_anchor": 15.0
 }
